@@ -1,0 +1,15 @@
+---
+CompileFlags:
+    Add: [-Wall, -Wextra, -Werror, -Wpedantic]
+---
+If:
+    PathMatch: .*\.c
+CompileFlags:
+    Add: [-std=c99]
+    Remove: [-std=c++.*]
+---
+If:
+    PathMatch: .*\.cpp
+CompileFlags:
+    Add: [-std=c++23]
+    Remove: [-std=c.*]

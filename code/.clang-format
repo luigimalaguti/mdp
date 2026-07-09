@@ -1,0 +1,21 @@
+---
+BasedOnStyle: Google
+UseTab: Never
+IndentWidth: 4
+ColumnLimit: 120
+InsertBraces: true
+PointerAlignment: Right
+AllowShortFunctionsOnASingleLine: Empty
+IncludeBlocks: Regroup
+IncludeCategories:
+    - Regex: '^".*'
+      Priority: 1
+    - Regex: "^<.*"
+      Priority: 2
+---
+Language: Cpp
+NamespaceIndentation: All
+AccessModifierOffset: 0
+IndentAccessModifiers: true
+---
+Language: C

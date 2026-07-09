@@ -1,0 +1,17 @@
+[
+  {
+    "label": "Build file",
+    "command": "make --directory=.. rebuild",
+    "cwd": "$ZED_DIRNAME"
+  },
+  {
+    "label": "Test program",
+    "command": "make --directory=.. rebuild && ../bin/main_c",
+    "args": [
+      "ONE",
+      "2",
+      "tre"
+    ],
+    "cwd": "$ZED_DIRNAME"
+  }
+]

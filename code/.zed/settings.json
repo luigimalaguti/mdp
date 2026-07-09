@@ -1,0 +1,48 @@
+{
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "path": "/usr/bin/clangd"
+      }
+    }
+  },
+  "languages": {
+    "C": {
+      "tab_size": 4,
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "language_servers": [
+        "!oxfmt",
+        "..."
+      ]
+    },
+    "C++": {
+      "tab_size": 4,
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "language_servers": [
+        "!oxfmt",
+        "..."
+      ]
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+    },
+    "JSONC": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+    },
+  },
+  "file_types": {
+    "C": [
+      "C",
+      "H"
+    ],
+    "YAML": [
+      ".clangd",
+      ".clang-format",
+      ".clang-tidy"
+    ]
+  }
+}
