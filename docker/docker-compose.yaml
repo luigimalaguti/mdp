@@ -2,7 +2,7 @@ services:
   docker:
     container_name: mdp
     build:
-      context: ./docker
+      context: .
       dockerfile: Dockerfile
       args:
         USERNAME: ${USERNAME}
@@ -12,7 +12,7 @@ services:
     ports:
       - "2222:22"
     volumes:
-      - ./code:/home/${USERNAME}/code
+      - ../code:/home/${USERNAME}/code
       - ssh_keys:/etc/ssh
     restart: unless-stopped
 
