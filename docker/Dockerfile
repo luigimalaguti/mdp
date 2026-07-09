@@ -8,7 +8,12 @@ RUN apt-get update \
         curl \
         vim \
         sudo \
-        openssh-server
+        ca-certificates \
+        openssh-server \
+        build-essential \
+        clang \
+        clangd \
+        git
 
 RUN useradd --create-home --shell /bin/bash $USERNAME \
     && usermod -aG sudo $USERNAME \
