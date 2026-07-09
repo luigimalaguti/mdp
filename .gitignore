@@ -6,6 +6,7 @@ bin
 
 # misc
 .DS_Store
+.cache
 
 # env files
 .env*
