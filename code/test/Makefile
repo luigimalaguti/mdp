@@ -1,3 +1,0 @@
-# Per-program overrides (optional) go before the include, e.g.:
-# LDFLAGS += -lm -lpthread
-include ../common.mk

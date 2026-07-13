@@ -1,5 +1,0 @@
-[
-  {"directory": "/home/luigimalaguti/code/test", "file": "src/c/mathutil.c", "command": "gcc -std=c99   -g -Wall -Wextra -Werror -Wpedantic -Iinclude  -MMD -MP -c src/c/mathutil.c"},
-  {"directory": "/home/luigimalaguti/code/test", "file": "src/cpp/greeter.cpp", "command": "g++ -std=c++23 -g -Wall -Wextra -Werror -Wpedantic -Iinclude  -MMD -MP -c src/cpp/greeter.cpp"},
-  {"directory": "/home/luigimalaguti/code/test", "file": "src/main.cpp", "command": "g++ -std=c++23 -g -Wall -Wextra -Werror -Wpedantic -Iinclude  -MMD -MP -c src/main.cpp"}
-]

@@ -1,30 +1,17 @@
-// Generic tasks: they walk up from the open file's directory until a
-// Makefile is found, so they work from any file of any program folder.
-// Edit only "args" of "Run program" to change the program's arguments.
 [
   {
     "label": "Build",
-    "command": "path=\"$ZED_DIRNAME\"; while [ \"$path\" != \"$ZED_WORKTREE_ROOT\" ] && [ ! -f \"$path/Makefile\" ]; do path=$(dirname \"$path\"); done; make -C \"$path\" --no-print-directory all"
+    "command": "make all",
+    "cwd": "$ZED_DIRNAME/.."
   },
   {
     "label": "Rebuild",
-    "command": "path=\"$ZED_DIRNAME\"; while [ \"$path\" != \"$ZED_WORKTREE_ROOT\" ] && [ ! -f \"$path/Makefile\" ]; do path=$(dirname \"$path\"); done; make -C \"$path\" --no-print-directory rebuild"
-  },
-  {
-    "label": "Run program",
-    "command": "path=\"$ZED_DIRNAME\"; while [ \"$path\" != \"$ZED_WORKTREE_ROOT\" ] && [ ! -f \"$path/Makefile\" ]; do path=$(dirname \"$path\"); done; cd \"$path\" 1> /dev/null && make --no-print-directory all && ./bin/main",
-    "args": [
-      "ONE",
-      "2",
-      "tre"
-    ]
-  },
-  {
-    "label": "Tests",
-    "command": "path=\"$ZED_DIRNAME\"; while [ \"$path\" != \"$ZED_WORKTREE_ROOT\" ] && [ ! -f \"$path/Makefile\" ]; do path=$(dirname \"$path\"); done; make -C \"$path\" --no-print-directory test"
+    "command": "make rebuild",
+    "cwd": "$ZED_DIRNAME/.."
   },
   {
     "label": "Clean",
-    "command": "path=\"$ZED_DIRNAME\"; while [ \"$path\" != \"$ZED_WORKTREE_ROOT\" ] && [ ! -f \"$path/Makefile\" ]; do path=$(dirname \"$path\"); done; make -C \"$path\" --no-print-directory clean"
+    "command": "make clean",
+    "cwd": "$ZED_DIRNAME/.."
   }
 ]
