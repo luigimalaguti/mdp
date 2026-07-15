@@ -1,33 +1,37 @@
-CC 			:= gcc
-CXX 		:= g++
+ifeq ($(origin CC),default)
+CC				:= gcc
+endif
+ifeq ($(origin CXX),default)
+CXX				:= g++
+endif
 
-CFLAGS   	?= -std=c99   -g -Wall -Wextra -Werror -Wpedantic
-CXXFLAGS 	?= -std=c++23 -g -Wall -Wextra -Werror -Wpedantic
+CFLAGS			?= -std=c99   -g -Wall -Wextra -Werror -Wpedantic
+CXXFLAGS		?= -std=c++23 -g -Wall -Wextra -Werror -Wpedantic
 
-LDFLAGS  	?=
+LDFLAGS			?=
 
-SRC_DIR	 	?= src
-INC_DIR   	?= include
-BUILD_DIR 	?= build
-BIN_DIR   	?= bin
-EXEC		?= main
-TARGET    	?= $(BIN_DIR)/$(EXEC)
+SRC_DIR			?= src
+INC_DIR			?= include
+BUILD_DIR		?= build
+BIN_DIR			?= bin
+EXEC			?= main
+TARGET			?= $(BIN_DIR)/$(EXEC)
 
-SRCS_C   	:= $(shell find $(SRC_DIR) -name '*.c'   2>/dev/null)
-SRCS_CXX 	:= $(shell find $(SRC_DIR) -name '*.cpp' 2>/dev/null)
-SRCS 		:= $(SRCS_C) $(SRCS_CXX)
+SRCS_C			:= $(shell find $(SRC_DIR) -name '*.c'   2>/dev/null)
+SRCS_CXX		:= $(shell find $(SRC_DIR) -name '*.cpp' 2>/dev/null)
+SRCS			:= $(SRCS_C) $(SRCS_CXX)
 
-OBJS 		:= $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(SRCS)))
-DEPS 		:= $(OBJS:.o=.d)
+OBJS			:= $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(SRCS)))
+DEPS			:= $(OBJS:.o=.d)
 
-LD 			:= $(if $(strip $(SRCS_CXX)),$(CXX),$(CC))
+LD				:= $(if $(strip $(SRCS_CXX)),$(CXX),$(CC))
 
-CPPFLAGS 	+= -MMD -MP -I$(INC_DIR)
+CPPFLAGS		+= -MMD -MP -I$(INC_DIR)
 
-COMP_DB 		:= compile_commands.json
-CACHE_DIR 		:= .cache
+COMP_DB			:= compile_commands.json
+CACHE_DIR		:= .cache
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL	:= all
 
 .PHONY: all
 all: rebuild
