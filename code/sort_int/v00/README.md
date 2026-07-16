@@ -4,15 +4,7 @@
 >
 > *Starting point, standard C program*
 
-```c
-int main(int argc, char **argv) {
-    // ...
-
-    // ...
-}
-```
-
-## Codice
+## Changelog
 
 Il testo dell'esercizio richiede di creare un programma che possa essere utilizzato secondo la seguente sintassi da terminale:
 

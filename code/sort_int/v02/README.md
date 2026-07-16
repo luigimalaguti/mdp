@@ -4,7 +4,7 @@
 >
 > *First OOP in C++*
 
-## Cambiamenti
+## Changelog
 
 Il programma precedente era arrivato a un livello di OOP che non poteva essere migliorato. Eppure il codice risultava difficile, lungo da leggere e ripetitivo. Quello che possiamo fare adesso per migliorarlo è passare a un linguaggio che supporti nativamente l'OOP, come C++. In questo modo possiamo eliminare alcune ripetizioni e rendere il codice più leggibile.
 

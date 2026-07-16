@@ -4,7 +4,7 @@
 >
 > *Moved standard C program to OOP*
 
-## Cambiamenti
+## Changelog
 
 In questa versione proviamo a prendere il codice scritto precedentemente e trasformarlo in una versione più vicina alla OOP. Come prima cosa possiamo creare la struttura più vicina a una classe in C, ovvero una `struct`.
 
