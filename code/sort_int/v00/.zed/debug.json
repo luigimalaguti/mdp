@@ -3,7 +3,7 @@
     "label": "Debug sort_int v00",
     "adapter": "CodeLLDB",
     "request": "launch",
-    "build": "Build",
+    "build": "Rebuild",
     "program": "$ZED_WORKTREE_ROOT/sort_int/v00/bin/sort_int",
     "args": [
       "../inputs/input01.txt",
