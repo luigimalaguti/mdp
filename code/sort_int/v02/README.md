@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
     int32_t number;
     while (fscanf(input_file, "%d", &number) == 1) {
         int result = vec->push_back(number);
-        if (!result) {
+        if (result == false) {
             printf("Error: Memory allocation failed\n");
             break;
         }
@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
     int32_t number;
     while (fscanf(input_file, "%d", &number) == 1) {
         int result = vec.push_back(number);
-        if (!result) {
+        if (result == false) {
             printf("Error: Memory allocation failed\n");
             break;
         }
