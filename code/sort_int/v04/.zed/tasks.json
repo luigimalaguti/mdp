@@ -1,0 +1,29 @@
+[
+  {
+    "label": "Run sort_int v04 files 01",
+    "command": "make rebuild && bin/sort_int",
+    "args": [
+      "../inputs/input01.txt",
+      "../outputs/output01.txt",
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/sort_int/v04",
+  },
+  {
+    "label": "Run sort_int v04 files 02",
+    "command": "make rebuild && bin/sort_int",
+    "args": [
+      "../inputs/input02.txt",
+      "../outputs/output02.txt",
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/sort_int/v04",
+  },
+  {
+    "label": "Run sort_int v04 files 03",
+    "command": "make rebuild && bin/sort_int",
+    "args": [
+      "../inputs/input03.txt",
+      "../outputs/output03.txt",
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/sort_int/v04",
+  }
+]
