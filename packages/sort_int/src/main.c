@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +7,57 @@ int compare_int32(const void *pointer_a, const void *pointer_b) {
     int32_t number_a = *(int32_t *)pointer_a;
     int32_t number_b = *(int32_t *)pointer_b;
     return (number_a > number_b) - (number_a < number_b);
+}
+
+typedef struct vector {
+    size_t size_;
+    size_t capacity_;
+    int32_t *data_;
+} vector_t;
+
+vector_t *vector_constructor(vector_t *this) {
+    this->size_ = 0;
+    this->capacity_ = 0;
+    this->data_ = NULL;
+    return this;
+}
+
+vector_t *vector_destructor(vector_t *this) {
+    free(this->data_);
+    return this;
+}
+
+vector_t *vector_new(void) {
+    vector_t *this = malloc(sizeof(vector_t));
+    return vector_constructor(this);
+}
+
+void vector_delete(vector_t *this) {
+    free(vector_destructor(this));
+}
+
+void vector_push_back(vector_t *this, int32_t number) {
+    if (this->size_ >= this->capacity_) {
+        size_t temp_capacity = this->capacity_ == 0 ? 1 : this->capacity_ * 2;
+        int32_t *temp_data = realloc(this->data_, temp_capacity * sizeof(int32_t));
+        this->data_ = temp_data;
+        this->capacity_ = temp_capacity;
+    }
+    this->data_[this->size_] = number;
+    this->size_++;
+}
+
+void vector_sort(vector_t *this) {
+    qsort(this->data_, this->size_, sizeof(int32_t), compare_int32);
+}
+
+size_t vector_size(const vector_t *this) {
+    return this->size_;
+}
+
+int32_t vector_at(const vector_t *this, size_t index) {
+    assert(index < this->size_);
+    return this->data_[index];
 }
 
 int main(int argc, char **argv) {
@@ -23,37 +75,28 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    size_t size = 0;
-    size_t capacity = 0;
-    int32_t *data = NULL;
+    vector_t *vec = vector_new();
 
     int32_t number;
     while (fscanf(input_file, "%d", &number) == 1) {
-        if (size >= capacity) {
-            size_t temp_capacity = capacity == 0 ? 1 : capacity * 2;
-            int32_t *temp_data = realloc(data, temp_capacity * sizeof(int32_t));
-            data = temp_data;
-            capacity = temp_capacity;
-        }
-        data[size] = number;
-        size++;
+        vector_push_back(vec, number);
     }
     fclose(input_file);
 
-    qsort(data, size, sizeof(int32_t), compare_int32);
+    vector_sort(vec);
 
     FILE *output_file = fopen(output_filename, "w");
     if (output_file == NULL) {
-        free(data);
+        vector_delete(vec);
         printf("Error: Could not open file %s\n", output_filename);
         return EXIT_FAILURE;
     }
 
-    for (size_t index = 0; index < size; index++) {
-        fprintf(output_file, "%d\n", data[index]);
+    for (size_t index = 0; index < vector_size(vec); index++) {
+        fprintf(output_file, "%d\n", vector_at(vec, index));
     }
     fclose(output_file);
 
-    free(data);
+    vector_delete(vec);
     return EXIT_SUCCESS;
 }
