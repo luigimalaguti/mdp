@@ -1,6 +1,6 @@
 # Makefile
 
-Questo documento vuole spiegare il funzionamento di `common.mk`, il Makefile condiviso alla radice del repository. Ogni progetto interno a `code` definisce quindi un proprio Makefile che importa `common.mk` e ottiene così le regole comuni a tutti i progetti. In questo modo, ogni progetto può definire le proprie regole specifiche, ma allo stesso tempo beneficiare delle regole generali definite in `common.mk`.
+Questo documento vuole spiegare il funzionamento di `common.mk`, il Makefile condiviso alla radice del repository. Ogni progetto interno a `packages` definisce quindi un proprio Makefile che importa `common.mk` e ottiene così le regole comuni a tutti i progetti. In questo modo, ogni progetto può definire le proprie regole specifiche, ma allo stesso tempo beneficiare delle regole generali definite in `common.mk`.
 
 ## common.mk
 
@@ -252,21 +252,21 @@ Ogni progetto può, e solitamente ha, i propri tasks di esecuzione. L'esecuzione
 ```json
 [
   {
-    "label": "Run $ZED_RELATIVE_FILE",
+    "label": "Run sort_int",
     "command": "make rebuild && bin/sort_int",
     "args": [
-      "../inputs/input01.txt",
-      "../outputs/output01.txt",
+      "inputs/input01.txt",
+      "outputs/output01.txt",
     ],
-    "cwd": "$ZED_DIRNAME/..",
-  }
+    "cwd": "$ZED_WORKTREE_ROOT/sort_int",
+  },
 ]
 ```
 
 In questo caso l'eseguibile non ha il nome standard `main`, ma nel Makefile è stato sovrascritto con `sort_int`. Inoltre, i singoli progetti potrebbero richiedere degli argomenti specifici, rendendo complicato avere un task generico di esecuzione.
 
 Zed accoda `args` al `command`, quindi il comando finale è
-`make rebuild && bin/sort_int ../inputs/input01.txt ../outputs/output01.txt`, eseguito dalla radice del progetto.
+`make rebuild && bin/sort_int inputs/input01.txt outputs/output01.txt`, eseguito dalla radice del progetto.
 
 ### Debug per progetto
 
@@ -275,16 +275,16 @@ Per la stessa ragione espressa precedentemente riguardo i tasks per progetto, an
 ```json
 [
   {
-    "label": "Debug program",
+    "label": "Debug sort_int",
     "adapter": "CodeLLDB",
     "request": "launch",
-    "build": "Build",
-    "program": "$ZED_DIRNAME/../bin/sort_int",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/sort_int/bin/sort_int",
     "args": [
-      "../inputs/input01.txt",
-      "../outputs/output01.txt",
+      "inputs/input01.txt",
+      "outputs/output01.txt",
     ],
-    "cwd": "$ZED_DIRNAME/.."
+    "cwd": "$ZED_WORKTREE_ROOT/sort_int",
   }
 ]
 ```

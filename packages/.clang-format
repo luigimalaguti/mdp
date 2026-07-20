@@ -15,7 +15,7 @@ IncludeCategories:
 ---
 Language: Cpp
 NamespaceIndentation: All
-AccessModifierOffset: 0
-IndentAccessModifiers: true
+AccessModifierOffset: -4
+IndentAccessModifiers: false
 ---
 Language: C

@@ -12,7 +12,7 @@ services:
     ports:
       - "2222:22"
     volumes:
-      - ../code:/home/${USERNAME}/code
+      - ../packages:/home/${USERNAME}/packages
       - ssh_keys:/etc/ssh
     restart: unless-stopped
 

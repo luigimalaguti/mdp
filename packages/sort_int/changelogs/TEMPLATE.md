@@ -2,7 +2,7 @@
 
 > **Sort int**
 >
-> *Starting point, standard C program*
+> *Short title*
 
 ## Changelog
 
@@ -12,7 +12,13 @@
 
 ### From code
 
+```cpp
+```
+
 ### To code
+
+```cpp
+```
 
 ## Details
 
