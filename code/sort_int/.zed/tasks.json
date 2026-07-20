@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Run sort_int",
+    "command": "make rebuild && bin/sort_int",
+    "args": [
+      "inputs/input01.txt",
+      "outputs/output01.txt",
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/sort_int",
+  },
+]
