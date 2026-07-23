@@ -1,6 +1,6 @@
 EXEC := sort_int
 
-STD_CXX 	:= c++11
+STD_CXX 	:= c++23
 NO_ELISION	:= 1
 NO_DEP_COPY := 1
 

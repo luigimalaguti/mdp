@@ -17,7 +17,7 @@ struct vector {
     vector() {
         size_ = 0;
         capacity_ = 0;
-        data_ = NULL;
+        data_ = nullptr;
     }
 
     vector(size_t capacity) {
@@ -35,6 +35,13 @@ struct vector {
         }
     }
 
+    vector(vector &&other) {
+        size_ = other.size_;
+        capacity_ = other.capacity_;
+        data_ = other.data_;
+        other.data_ = nullptr;
+    }
+
     ~vector() {
         delete[] data_;
     }
@@ -49,6 +56,15 @@ struct vector {
                 data_[index] = rhs.data_[index];
             }
         }
+        return *this;
+    }
+
+    vector &operator=(vector &&rhs) {
+        size_ = rhs.size_;
+        capacity_ = rhs.capacity_;
+        delete[] data_;
+        data_ = rhs.data_;
+        rhs.data_ = nullptr;
         return *this;
     }
 
