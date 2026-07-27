@@ -5,44 +5,34 @@
 #include <utility>
 
 namespace mdp {
-    int compare_int32(const void *pointer_a, const void *pointer_b) {
-        int32_t number_a = *(int32_t *)pointer_a;
-        int32_t number_b = *(int32_t *)pointer_b;
-        return (number_a > number_b) - (number_a < number_b);
+    template <typename T>
+    int compare(const void *pointer_a, const void *pointer_b) {
+        T value_a = *(T *)pointer_a;
+        T value_b = *(T *)pointer_b;
+        return (value_a > value_b) - (value_a < value_b);
     }
 
+    template <typename T>
     class vector {
     private:
         size_t size_;
         size_t capacity_;
-        int32_t *data_;
+        T *data_;
 
     public:
-        vector() {
-            size_ = 0;
-            capacity_ = 0;
-            data_ = nullptr;
+        vector(size_t capacity = 0) : size_(0), capacity_(capacity), data_(nullptr) {
+            if (capacity_ > 0) {
+                data_ = new T[capacity_];
+            }
         }
 
-        vector(size_t capacity) {
-            size_ = 0;
-            capacity_ = capacity;
-            data_ = new int32_t[capacity];
-        }
-
-        vector(const vector &other) {
-            size_ = other.size_;
-            capacity_ = other.capacity_;
-            data_ = new int32_t[capacity_];
+        vector(const vector &other) : size_(other.size_), capacity_(other.capacity_), data_(new T[capacity_]) {
             for (size_t index = 0; index < size_; index++) {
                 data_[index] = other.data_[index];
             }
         }
 
-        vector(vector &&other) {
-            size_ = other.size_;
-            capacity_ = other.capacity_;
-            data_ = other.data_;
+        vector(vector &&other) : size_(other.size_), capacity_(other.capacity_), data_(other.data_) {
             other.data_ = nullptr;
         }
 
@@ -55,10 +45,18 @@ namespace mdp {
             return *this;
         }
 
-        void push_back(int32_t number) {
+        const T &operator[](size_t index) const {
+            return data_[index];
+        }
+
+        T &operator[](size_t index) {
+            return data_[index];
+        }
+
+        void push_back(const T &number) {
             if (size_ >= capacity_) {
                 size_t temp_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
-                int32_t *temp_data = new int32_t[temp_capacity];
+                T *temp_data = new T[temp_capacity];
                 for (size_t index = 0; index < size_; index++) {
                     temp_data[index] = data_[index];
                 }
@@ -71,14 +69,14 @@ namespace mdp {
         }
 
         void sort() {
-            qsort(data_, size_, sizeof(int32_t), compare_int32);
+            qsort(data_, size_, sizeof(T), compare<T>);
         }
 
         size_t size() const {
             return size_;
         }
 
-        int32_t at(size_t index) const {
+        const T &at(size_t index) const {
             assert(index < size_);
             return data_[index];
         }
@@ -96,8 +94,8 @@ namespace mdp {
     };
 }  // namespace mdp
 
-mdp::vector read_from_file(const char *filename, size_t capacity) {
-    mdp::vector vec(capacity);
+mdp::vector<int32_t> read_from_file(const char *filename, size_t capacity) {
+    mdp::vector<int32_t> vec(capacity);
     FILE *file = fopen(filename, "r");
     if (file != NULL) {
         int32_t number;
@@ -109,7 +107,7 @@ mdp::vector read_from_file(const char *filename, size_t capacity) {
     return vec;
 }
 
-bool write_to_file(const char *filename, const mdp::vector &vec) {
+bool write_to_file(const char *filename, const mdp::vector<int32_t> &vec) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         return false;
@@ -130,14 +128,14 @@ int main(int argc, char **argv) {
     const char *input_filename = argv[1];
     const char *output_filename = argv[2];
 
-    mdp::vector vec;
+    mdp::vector<int32_t> vec;
     vec = read_from_file(input_filename, 10);
     if (vec.empty() == true) {
         printf("Error: Could not open file %s\n", input_filename);
         return EXIT_FAILURE;
     }
 
-    mdp::vector sorted = vec;
+    mdp::vector<int32_t> sorted = vec;
     vec.sort();
     swap(vec, sorted);
 
