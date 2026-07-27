@@ -1,7 +1,7 @@
+#include <algorithm>
 #include <cassert>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
+#include <fstream>
+#include <print>
 #include <utility>
 
 namespace mdp {
@@ -27,9 +27,7 @@ namespace mdp {
         }
 
         vector(const vector &other) : size_(other.size_), capacity_(other.capacity_), data_(new T[capacity_]) {
-            for (size_t index = 0; index < size_; index++) {
-                data_[index] = other.data_[index];
-            }
+            std::copy_n(other.data_, size_, data_);
         }
 
         vector(vector &&other) : size_(other.size_), capacity_(other.capacity_), data_(other.data_) {
@@ -57,9 +55,7 @@ namespace mdp {
             if (size_ >= capacity_) {
                 size_t temp_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
                 T *temp_data = new T[temp_capacity];
-                for (size_t index = 0; index < size_; index++) {
-                    temp_data[index] = data_[index];
-                }
+                std::copy_n(data_, size_, temp_data);
                 delete[] data_;
                 data_ = temp_data;
                 capacity_ = temp_capacity;
@@ -96,32 +92,30 @@ namespace mdp {
 
 mdp::vector<int32_t> read_from_file(const char *filename, size_t capacity) {
     mdp::vector<int32_t> vec(capacity);
-    FILE *file = fopen(filename, "r");
-    if (file != NULL) {
+    std::ifstream is(filename);
+    if (is) {
         int32_t number;
-        while (fscanf(file, "%d", &number) == 1) {
+        while (is >> number) {
             vec.push_back(number);
         }
-        fclose(file);
     }
     return vec;
 }
 
 bool write_to_file(const char *filename, const mdp::vector<int32_t> &vec) {
-    FILE *file = fopen(filename, "w");
-    if (file == NULL) {
+    std::ofstream os(filename);
+    if (!os) {
         return false;
     }
     for (size_t index = 0; index < vec.size(); index++) {
-        fprintf(file, "%d\n", vec.at(index));
+        os << vec[index] << "\n";
     }
-    fclose(file);
     return true;
 }
 
 int main(int argc, char **argv) {
     if (argc != 3) {
-        printf("Usage: %s <input_file> <output_file>\n", argv[0]);
+        std::println("Usage: {} <input_file> <output_file>", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -131,7 +125,7 @@ int main(int argc, char **argv) {
     mdp::vector<int32_t> vec;
     vec = read_from_file(input_filename, 10);
     if (vec.empty() == true) {
-        printf("Error: Could not open file %s\n", input_filename);
+        std::println("Error: Could not open file {}", input_filename);
         return EXIT_FAILURE;
     }
 
@@ -141,7 +135,7 @@ int main(int argc, char **argv) {
 
     bool result = write_to_file(output_filename, sorted);
     if (result == false) {
-        printf("Error: Could not open file %s\n", output_filename);
+        std::println("Error: Could not open file {}", output_filename);
         return EXIT_FAILURE;
     }
 
