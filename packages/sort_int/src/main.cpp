@@ -2,107 +2,102 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <utility>
 
-int compare_int32(const void *pointer_a, const void *pointer_b) {
-    int32_t number_a = *(int32_t *)pointer_a;
-    int32_t number_b = *(int32_t *)pointer_b;
-    return (number_a > number_b) - (number_a < number_b);
-}
-
-struct vector {
-    size_t size_;
-    size_t capacity_;
-    int32_t *data_;
-
-    vector() {
-        size_ = 0;
-        capacity_ = 0;
-        data_ = nullptr;
+namespace mdp {
+    int compare_int32(const void *pointer_a, const void *pointer_b) {
+        int32_t number_a = *(int32_t *)pointer_a;
+        int32_t number_b = *(int32_t *)pointer_b;
+        return (number_a > number_b) - (number_a < number_b);
     }
 
-    vector(size_t capacity) {
-        size_ = 0;
-        capacity_ = capacity;
-        data_ = new int32_t[capacity];
-    }
+    class vector {
+    private:
+        size_t size_;
+        size_t capacity_;
+        int32_t *data_;
 
-    vector(const vector &other) {
-        size_ = other.size_;
-        capacity_ = other.capacity_;
-        data_ = new int32_t[capacity_];
-        for (size_t index = 0; index < size_; index++) {
-            data_[index] = other.data_[index];
+    public:
+        vector() {
+            size_ = 0;
+            capacity_ = 0;
+            data_ = nullptr;
         }
-    }
 
-    vector(vector &&other) {
-        size_ = other.size_;
-        capacity_ = other.capacity_;
-        data_ = other.data_;
-        other.data_ = nullptr;
-    }
+        vector(size_t capacity) {
+            size_ = 0;
+            capacity_ = capacity;
+            data_ = new int32_t[capacity];
+        }
 
-    ~vector() {
-        delete[] data_;
-    }
-
-    vector &operator=(const vector &rhs) {
-        if (this != &rhs) {
-            size_ = rhs.size_;
-            capacity_ = rhs.capacity_;
-            delete[] data_;
+        vector(const vector &other) {
+            size_ = other.size_;
+            capacity_ = other.capacity_;
             data_ = new int32_t[capacity_];
             for (size_t index = 0; index < size_; index++) {
-                data_[index] = rhs.data_[index];
+                data_[index] = other.data_[index];
             }
         }
-        return *this;
-    }
 
-    vector &operator=(vector &&rhs) {
-        size_ = rhs.size_;
-        capacity_ = rhs.capacity_;
-        delete[] data_;
-        data_ = rhs.data_;
-        rhs.data_ = nullptr;
-        return *this;
-    }
+        vector(vector &&other) {
+            size_ = other.size_;
+            capacity_ = other.capacity_;
+            data_ = other.data_;
+            other.data_ = nullptr;
+        }
 
-    void push_back(int32_t number) {
-        if (size_ >= capacity_) {
-            size_t temp_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
-            int32_t *temp_data = new int32_t[temp_capacity];
-            for (size_t index = 0; index < size_; index++) {
-                temp_data[index] = data_[index];
-            }
+        ~vector() {
             delete[] data_;
-            data_ = temp_data;
-            capacity_ = temp_capacity;
         }
-        data_[size_] = number;
-        size_++;
-    }
 
-    void sort() {
-        qsort(data_, size_, sizeof(int32_t), compare_int32);
-    }
+        vector &operator=(vector rhs) {
+            swap(*this, rhs);
+            return *this;
+        }
 
-    size_t size() const {
-        return size_;
-    }
+        void push_back(int32_t number) {
+            if (size_ >= capacity_) {
+                size_t temp_capacity = capacity_ == 0 ? 1 : capacity_ * 2;
+                int32_t *temp_data = new int32_t[temp_capacity];
+                for (size_t index = 0; index < size_; index++) {
+                    temp_data[index] = data_[index];
+                }
+                delete[] data_;
+                data_ = temp_data;
+                capacity_ = temp_capacity;
+            }
+            data_[size_] = number;
+            size_++;
+        }
 
-    int32_t at(size_t index) const {
-        assert(index < size_);
-        return data_[index];
-    }
+        void sort() {
+            qsort(data_, size_, sizeof(int32_t), compare_int32);
+        }
 
-    bool empty() const {
-        return size_ == 0;
-    }
-};
+        size_t size() const {
+            return size_;
+        }
 
-vector read_from_file(const char *filename, size_t capacity) {
-    vector vec(capacity);
+        int32_t at(size_t index) const {
+            assert(index < size_);
+            return data_[index];
+        }
+
+        bool empty() const {
+            return size_ == 0;
+        }
+
+        friend void swap(vector &vector_a, vector &vector_b) {
+            using std::swap;
+            swap(vector_a.size_, vector_b.size_);
+            swap(vector_a.capacity_, vector_b.capacity_);
+            swap(vector_a.data_, vector_b.data_);
+        }
+    };
+}  // namespace mdp
+
+mdp::vector read_from_file(const char *filename, size_t capacity) {
+    mdp::vector vec(capacity);
     FILE *file = fopen(filename, "r");
     if (file != NULL) {
         int32_t number;
@@ -114,7 +109,7 @@ vector read_from_file(const char *filename, size_t capacity) {
     return vec;
 }
 
-bool write_to_file(const char *filename, const vector &vec) {
+bool write_to_file(const char *filename, const mdp::vector &vec) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         return false;
@@ -135,16 +130,18 @@ int main(int argc, char **argv) {
     const char *input_filename = argv[1];
     const char *output_filename = argv[2];
 
-    vector vec;
+    mdp::vector vec;
     vec = read_from_file(input_filename, 10);
     if (vec.empty() == true) {
         printf("Error: Could not open file %s\n", input_filename);
         return EXIT_FAILURE;
     }
 
+    mdp::vector sorted = vec;
     vec.sort();
+    swap(vec, sorted);
 
-    bool result = write_to_file(output_filename, vec);
+    bool result = write_to_file(output_filename, sorted);
     if (result == false) {
         printf("Error: Could not open file %s\n", output_filename);
         return EXIT_FAILURE;
