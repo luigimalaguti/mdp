@@ -6,6 +6,6 @@
       "inputs/input01.txt",
       "outputs/output01.txt",
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/sort_int",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/sort_int",
   },
 ]

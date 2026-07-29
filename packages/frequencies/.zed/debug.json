@@ -1,11 +1,14 @@
 [
   {
-    "label": "Debug boilerplate",
+    "label": "Debug frequencies",
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/boilerplate/bin/main",
-    "args": [],
-    "cwd": "$ZED_WORKTREE_ROOT/boilerplate",
+    "program": "$ZED_WORKTREE_ROOT/packages/frequencies/bin/main",
+    "args": [
+      "inputs/bibbia.txt",
+      "outputs/bibbia.txt",
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/frequencies",
   }
 ]

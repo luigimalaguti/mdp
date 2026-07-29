@@ -1,0 +1,11 @@
+# git
+.git
+
+# artifacts
+build
+bin
+compile_commands.json
+
+# misc
+.DS_Store
+.cache

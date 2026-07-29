@@ -3,6 +3,6 @@
     "label": "Run read_int11",
     "command": "make rebuild && bin/main",
     "args": [],
-    "cwd": "$ZED_WORKTREE_ROOT/read_int11",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/read_int11",
   },
 ]

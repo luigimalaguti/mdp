@@ -1,8 +1,11 @@
 [
   {
-    "label": "Run boilerplate",
+    "label": "Run frequencies",
     "command": "make rebuild && bin/main",
-    "args": [],
-    "cwd": "$ZED_WORKTREE_ROOT/boilerplate",
+    "args": [
+      "inputs/bibbia.txt",
+      "outputs/bibbia.txt",
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/frequencies",
   },
 ]

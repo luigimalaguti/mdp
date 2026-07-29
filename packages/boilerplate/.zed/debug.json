@@ -4,8 +4,8 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/boilerplate/bin/main",
+    "program": "$ZED_WORKTREE_ROOT/packages/boilerplate/bin/main",
     "args": [],
-    "cwd": "$ZED_WORKTREE_ROOT/boilerplate",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/boilerplate",
   }
 ]

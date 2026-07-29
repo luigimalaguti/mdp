@@ -258,7 +258,7 @@ Ogni progetto può, e solitamente ha, i propri tasks di esecuzione. L'esecuzione
       "inputs/input01.txt",
       "outputs/output01.txt",
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/sort_int",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/sort_int",
   },
 ]
 ```
@@ -279,12 +279,12 @@ Per la stessa ragione espressa precedentemente riguardo i tasks per progetto, an
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/sort_int/bin/sort_int",
+    "program": "$ZED_WORKTREE_ROOT/packages/sort_int/bin/sort_int",
     "args": [
       "inputs/input01.txt",
       "outputs/output01.txt",
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/sort_int",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/sort_int",
   }
 ]
 ```
