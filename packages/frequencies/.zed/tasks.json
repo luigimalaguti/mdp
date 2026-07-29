@@ -1,0 +1,8 @@
+[
+  {
+    "label": "Run boilerplate",
+    "command": "make rebuild && bin/main",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT/boilerplate",
+  },
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Debug boilerplate",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/boilerplate/bin/main",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT/boilerplate",
+  }
+]
