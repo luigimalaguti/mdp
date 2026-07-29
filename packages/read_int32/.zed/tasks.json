@@ -1,0 +1,8 @@
+[
+  {
+    "label": "Run read_int32",
+    "command": "make rebuild && bin/main",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT/read_int32",
+  },
+]
