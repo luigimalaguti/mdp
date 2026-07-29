@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Debug read_int11",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/read_int11/bin/main",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT/read_int11",
+  }
+]
