@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Debug write_int32",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/write_int32/bin/main",
+    "args": [],
+    "cwd": "$ZED_WORKTREE_ROOT/write_int32",
+  }
+]
