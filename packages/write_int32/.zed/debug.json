@@ -4,8 +4,11 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/write_int32/bin/main",
-    "args": [],
+    "program": "$ZED_WORKTREE_ROOT/packages/write_int32/bin/write_int32",
+    "args": [
+      "inputs/file01.txt",
+      "outputs/file01.bin",
+    ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/write_int32",
   }
 ]

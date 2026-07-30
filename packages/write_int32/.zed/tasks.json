@@ -1,8 +1,11 @@
 [
   {
     "label": "Run write_int32",
-    "command": "make rebuild && bin/main",
-    "args": [],
+    "command": "make rebuild && bin/write_int32",
+    "args": [
+      "inputs/file02.txt",
+      "outputs/file02.bin",
+    ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/write_int32",
   },
 ]
