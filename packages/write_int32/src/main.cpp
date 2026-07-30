@@ -17,6 +17,14 @@ void write_little_endian(std::ofstream &os, const T &number, size_t size = sizeo
     }
 }
 
+template <typename T>
+void write_big_endian(std::ofstream &os, const T &number, size_t size = sizeof(T)) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t byte = static_cast<uint8_t>((number >> ((size - 1 - i) * 8)) & 0xff);
+        os.put(byte);
+    }
+}
+
 int main(int argc, char **argv) {
     if (argc != 3) {
         std::println("Usage: {}  <filein.txt> <fileout.bin>", argv[0]);
