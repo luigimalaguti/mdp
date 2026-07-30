@@ -14,6 +14,7 @@ RUN apt-get update \
         sudo \
         openssh-client \
         locales \
+        xxd \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
