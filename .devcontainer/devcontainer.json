@@ -16,6 +16,5 @@
   ],
   "remoteEnv": {
     "SSH_AUTH_SOCK": "/ssh-agent"
-  },
-  "postStartCommand": "sudo chmod 666 /ssh-agent"
+  }
 }
