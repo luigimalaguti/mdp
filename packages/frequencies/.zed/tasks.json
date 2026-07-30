@@ -1,10 +1,10 @@
 [
   {
     "label": "Run frequencies",
-    "command": "make rebuild && bin/main",
+    "command": "make rebuild && bin/frequencies",
     "args": [
-      "inputs/bibbia.txt",
-      "outputs/bibbia.txt",
+      "inputs/example.bin",
+      "outputs/example.txt",
     ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/frequencies",
   },

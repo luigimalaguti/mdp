@@ -4,7 +4,7 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/frequencies/bin/main",
+    "program": "$ZED_WORKTREE_ROOT/packages/frequencies/bin/frequencies",
     "args": [
       "inputs/bibbia.txt",
       "outputs/bibbia.txt",
