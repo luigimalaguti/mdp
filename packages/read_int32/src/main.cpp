@@ -24,6 +24,20 @@ std::istream &read_little_endian(std::ifstream &is, T &number, size_t size = siz
     return is;
 }
 
+template <typename T>
+std::istream &read_big_endian(std::ifstream &is, T &number, size_t size = sizeof(T)) {
+    T bytes = 0;
+    for (size_t i = 0; i < size; i++) {
+        char byte;
+        if (!is.get(byte)) {
+            return is;
+        }
+        bytes |= (static_cast<T>(static_cast<uint8_t>(byte)) << ((size - 1 - i) * 8));
+    }
+    number = static_cast<T>(bytes);
+    return is;
+}
+
 int main(int argc, char **argv) {
     if (argc != 3) {
         std::println("Usage: {} <filein.bin> <fileout.txt>", argv[0]);
