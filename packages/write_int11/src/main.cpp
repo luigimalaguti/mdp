@@ -8,39 +8,39 @@ class bit_writer {
     std::ostream &os_;
     size_t bits_;
     uint8_t buffer_;
-    size_t written_;
+    size_t pending_;
 
     void write_bit(uint8_t bit) {
         buffer_ = (buffer_ << 1) | bit;
-        written_++;
-        if (written_ == 8) {
+        pending_ += 1;
+        if (pending_ == 8) {
             os_.put(buffer_);
-            written_ = 0;
+            pending_ = 0;
         }
     }
 
     void write_byte(uint8_t byte) {
-        if (written_ > 0) {
-            buffer_ = (buffer_ << (8 - written_)) | (byte >> written_);
+        if (pending_ > 0) {
+            buffer_ = (buffer_ << (8 - pending_)) | (byte >> pending_);
             os_.put(buffer_);
-            buffer_ = byte & ((0x1 << written_) - 0x1);
+            buffer_ = byte & ((0x1 << pending_) - 0x1);
         } else {
             os_.put(byte);
         }
     }
 
 public:
-    bit_writer(std::ostream &os, size_t bits = 8) : os_(os), bits_(bits), buffer_(0), written_(0) {}
+    bit_writer(std::ostream &os, size_t bits = 8) : os_(os), bits_(bits), buffer_(0), pending_(0) {}
 
     ~bit_writer() {
         flush();
     }
 
-    void operator()(const uint64_t value) {
-        write(value);
+    std::ostream &operator()(const uint64_t value) {
+        return write(value);
     }
 
-    void write(const uint64_t value) {
+    std::ostream &write(const uint64_t value) {
         size_t bit = bits_;
         while (bit > 0) {
             if (bit >= 8) {
@@ -53,13 +53,14 @@ public:
                 bit -= 1;
             }
         }
+        return os_;
     }
 
     void flush() {
-        if (written_ > 0) {
-            buffer_ = buffer_ << (8 - written_);
+        if (pending_ > 0) {
+            buffer_ = buffer_ << (8 - pending_);
             os_.put(buffer_);
-            written_ = 0;
+            pending_ = 0;
         }
     }
 
