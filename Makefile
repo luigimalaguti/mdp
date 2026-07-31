@@ -20,7 +20,6 @@ NEW_PACKAGE_NAME ?= new-package
 all:
 	@echo "Available targets:"
 	@echo "  package - Create a new package using the package script"
-	@echo "  sync    - Sync all packages using uv sync"
 
 # ==================================================
 # mdp phony rules
