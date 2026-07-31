@@ -4,8 +4,11 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/read_int11/bin/main",
-    "args": [],
+    "program": "$ZED_WORKTREE_ROOT/packages/read_int11/bin/read_int11",
+    "args": [
+      "inputs/file01.bin",
+      "outputs/file01.txt"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/read_int11",
   }
 ]
