@@ -1,0 +1,28 @@
+[
+  {
+    "label": "Debug elias compression",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/elias/bin/elias",
+    "args": [
+      "c",
+      "inputs/file01.txt",
+      "outputs/file01.bin"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+  },
+  {
+    "label": "Debug elias decompression",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/elias/bin/elias",
+    "args": [
+      "d",
+      "outputs/file01.bin",
+      "inputs/file01.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+  }
+]

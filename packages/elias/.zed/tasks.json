@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Run elias compression",
+    "command": "make rebuild && bin/elias",
+    "args": [
+      "c",
+      "inputs/file01.txt",
+      "outputs/file01.bin"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+  },
+  {
+    "label": "Run elias decompression",
+    "command": "make rebuild && bin/elias",
+    "args": [
+      "d",
+      "outputs/file01.bin",
+      "inputs/file01.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+  },
+]
