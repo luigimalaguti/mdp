@@ -17,5 +17,8 @@ Language: Cpp
 NamespaceIndentation: All
 AccessModifierOffset: -4
 IndentAccessModifiers: false
+AllowShortLambdasOnASingleLine: Empty
+BreakBeforeBraces: Attach
+LambdaBodyIndentation: OuterScope
 ---
 Language: C
