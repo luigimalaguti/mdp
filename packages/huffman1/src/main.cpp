@@ -1,280 +1,457 @@
+#include <algorithm>
 #include <cstdint>
 #include <fstream>
+#include <iterator>
 #include <print>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
-class bit_reader {
-    std::istream &is_;
-    uint8_t buffer_;
-    size_t pending_;
+namespace bit_stream {
+    class bit_writer {
+        std::ostream &os_;
+        uint8_t buffer_ = 0;
+        size_t pending_ = 0;
 
-    uint8_t read_bit() {
-        if (pending_ == 0) {
-            buffer_ = is_.get();
-            pending_ = 8;
+        void write_bit(uint8_t bit) {
+            buffer_ = (buffer_ << 1) | bit;
+            pending_ += 1;
+            if (pending_ == 8) {
+                os_.put(buffer_);
+                pending_ = 0;
+            }
         }
-        pending_ -= 1;
-        return (buffer_ >> pending_) & 0x1;
-    }
 
-    uint8_t read_byte() {
-        if (pending_ > 0) {
-            uint8_t byte = buffer_ << (8 - pending_);
-            buffer_ = is_.get();
-            byte = byte | (buffer_ >> pending_);
+        void write_byte(uint8_t byte) {
+            if (pending_ > 0) {
+                buffer_ = (buffer_ << (8 - pending_)) | (byte >> pending_);
+                os_.put(buffer_);
+                buffer_ = byte & ((0x1 << pending_) - 0x1);
+            } else {
+                os_.put(byte);
+            }
+        }
+
+      public:
+        bit_writer(std::ostream &os) : os_(os) {}
+
+        ~bit_writer() {
+            flush();
+        }
+
+        std::ostream &write(const uint64_t &value, size_t bits) {
+            while (bits > 0) {
+                if (bits >= 8) {
+                    uint8_t byte = (value >> (bits - 8)) & 0xff;
+                    write_byte(byte);
+                    bits -= 8;
+                } else {
+                    uint8_t bit = (value >> (bits - 1)) & 0x1;
+                    write_bit(bit);
+                    bits -= 1;
+                }
+            }
+            return os_;
+        }
+
+        void flush() {
+            if (pending_ > 0) {
+                buffer_ = buffer_ << (8 - pending_);
+                os_.put(buffer_);
+                pending_ = 0;
+            }
+        }
+    };
+
+    class bit_reader {
+        std::istream &is_;
+        uint8_t buffer_ = 0;
+        size_t pending_ = 0;
+
+        uint8_t read_bit() {
+            if (pending_ == 0) {
+                buffer_ = is_.get();
+                pending_ = 8;
+            }
+            pending_ -= 1;
+            return (buffer_ >> pending_) & 0x1;
+        }
+
+        uint8_t read_byte() {
+            uint8_t byte;
+            if (pending_ > 0) {
+                byte = buffer_ << (8 - pending_);
+                buffer_ = is_.get();
+                byte = byte | (buffer_ >> pending_);
+            } else {
+                byte = is_.get();
+            }
             return byte;
+        }
+
+      public:
+        bit_reader(std::istream &is) : is_(is) {}
+
+        std::istream &read(uint64_t &value, size_t bits) {
+            value = 0;
+            while (bits > 0) {
+                if (bits >= 8) {
+                    value = (value << 8) | read_byte();
+                    bits -= 8;
+                } else {
+                    value = (value << 1) | read_bit();
+                    bits -= 1;
+                }
+            }
+            return is_;
+        }
+    };
+};  // namespace bit_stream
+
+namespace huffman_encode {
+    class frequency_table {
+        std::unordered_map<uint8_t, size_t> frequencies_;
+        size_t total_frequencies_ = 0;
+
+      public:
+        void operator()(uint8_t symbol) {
+            frequencies_[symbol] += 1;
+            total_frequencies_ += 1;
+        }
+
+        auto begin() const {
+            return frequencies_.begin();
+        }
+
+        auto end() const {
+            return frequencies_.end();
+        }
+
+        size_t total() const {
+            return total_frequencies_;
+        }
+    };
+
+    struct tree_node {
+        int16_t symbol_ = -1;
+        size_t frequency_ = 0;
+        tree_node *left_ = nullptr;
+        tree_node *right_ = nullptr;
+
+        tree_node() {}
+
+        tree_node(int16_t symbol, size_t frequency) : symbol_(symbol), frequency_(frequency) {}
+
+        tree_node(tree_node *left, tree_node *right)
+            : frequency_(left->frequency_ + right->frequency_), left_(left), right_(right) {}
+
+        bool operator!() const {
+            return left_ == nullptr && right_ == nullptr;
+        }
+
+        int operator<(const tree_node &rhs) const {
+            if (frequency_ == rhs.frequency_) {
+                return symbol_ < rhs.symbol_;
+            }
+            return frequency_ > rhs.frequency_;
+        }
+    };
+
+    struct code_pair {
+        uint8_t length_;
+        uint32_t code_;
+    };
+
+    class codes_table {
+        std::unordered_map<uint8_t, code_pair> codes_;
+
+      public:
+        void operator()(uint8_t symbol, uint8_t length, uint32_t code) {
+            codes_[symbol] = {length, code};
+        }
+
+        const code_pair &operator[](uint8_t symbol) {
+            return codes_[symbol];
+        }
+
+        auto begin() const {
+            return codes_.begin();
+        }
+
+        auto end() const {
+            return codes_.end();
+        }
+
+        size_t size() const {
+            return codes_.size();
+        }
+    };
+
+    frequency_table create_frequency_table(std::istream &is) {
+        std::istreambuf_iterator<char> start(is);
+        std::istreambuf_iterator<char> stop;
+        frequency_table frequencies;
+        frequencies = std::for_each(start, stop, frequencies);
+        is.clear();
+        is.seekg(0, std::ios::beg);
+        return frequencies;
+    }
+
+    tree_node *create_binary_tree(frequency_table &frequencies) {
+        std::vector<tree_node *> nodes;
+        for (const auto &[symbol, frequency] : frequencies) {
+            tree_node *node = new tree_node(symbol, frequency);
+            nodes.push_back(node);
+        }
+
+        auto compare_nodes = [](tree_node *lhs, tree_node *rhs) {
+            return *lhs < *rhs;
+        };
+        std::sort(nodes.begin(), nodes.end(), compare_nodes);
+
+        while (nodes.size() > 1) {
+            tree_node *right = nodes.back();
+            nodes.pop_back();
+            tree_node *left = nodes.back();
+            nodes.pop_back();
+            tree_node *parent = new tree_node(left, right);
+            auto it = std::lower_bound(nodes.begin(), nodes.end(), parent, compare_nodes);
+            nodes.insert(it, parent);
+        }
+        tree_node *root = nodes.back();
+        nodes.pop_back();
+
+        return root;
+    }
+
+    void delete_binary_tree(tree_node *node) {
+        if (!*node) {
+            delete node;
         } else {
-            buffer_ = is_.get();
-            return buffer_;
+            delete_binary_tree(node->left_);
+            delete_binary_tree(node->right_);
+            delete node;
         }
     }
 
-public:
-    bit_reader(std::istream &is) : is_(is), buffer_(0), pending_(0) {}
-
-    std::istream &operator()(uint64_t &value, size_t bits) {
-        return read(value, bits);
-    }
-
-    std::istream &read(uint64_t &value, size_t bits) {
-        value = 0;
-        while (bits > 0) {
-            if (bits >= 8) {
-                value = (value << 8) | read_byte();
-                bits -= 8;
-            } else {
-                value = (value << 1) | read_bit();
-                bits -= 1;
-            }
-        }
-        return is_;
-    }
-};
-
-class bit_writer {
-    std::ostream &os_;
-    uint8_t buffer_;
-    size_t pending_;
-
-    void write_bit(uint8_t bit) {
-        buffer_ = (buffer_ << 1) | bit;
-        pending_ += 1;
-        if (pending_ == 8) {
-            os_.put(buffer_);
-            pending_ = 0;
-        }
-    }
-
-    void write_byte(uint8_t byte) {
-        if (pending_ > 0) {
-            buffer_ = (buffer_ << (8 - pending_)) | (byte >> pending_);
-            os_.put(buffer_);
-            buffer_ = byte & ((0x1 << pending_) - 0x1);
+    void create_codes_table(codes_table &table, tree_node *node, uint8_t length, uint32_t code) {
+        if (!*node) {
+            table(node->symbol_, length, code);
         } else {
-            os_.put(byte);
+            create_codes_table(table, node->left_, length + 1, (code << 1) | 0);
+            create_codes_table(table, node->right_, length + 1, (code << 1) | 1);
         }
     }
 
-public:
-    bit_writer(std::ostream &os) : os_(os), buffer_(0), pending_(0) {}
+    void write_encoding(std::istream &is, std::ostream &os, frequency_table &frequencies, codes_table &codes) {
+        const std::string magic_number = "HUFFMAN1";
+        os.write(magic_number.data(), 8);
 
-    ~bit_writer() {
-        flush();
+        const uint8_t table_entries = codes.size() == 256 ? 0 : codes.size();
+        os.write(reinterpret_cast<const char *>(&table_entries), 1);
+
+        bit_stream::bit_writer writer(os);
+        for (const auto &[symbol, pair] : codes) {
+            const auto &[length, code] = pair;
+            writer.write(symbol, 8);
+            writer.write(length, 5);
+            writer.write(code, length);
+        }
+
+        const uint32_t number_symbols = frequencies.total();
+        writer.write(number_symbols, 32);
+
+        uint8_t symbol;
+        while (is.read(reinterpret_cast<char *>(&symbol), 1)) {
+            const auto &[length, code] = codes[symbol];
+            writer.write(code, length);
+        }
     }
 
-    std::ostream &operator()(const uint64_t value, size_t bits) {
-        return write(value, bits);
-    }
+    int compression(const std::string &input_filename, const std::string &output_filename) {
+        std::ifstream is(input_filename, std::ios::binary);
+        if (!is) {
+            std::println("Error: Could not open file {}", input_filename);
+            return 1;
+        }
 
-    std::ostream &write(const uint64_t value, size_t bits) {
-        while (bits > 0) {
-            if (bits >= 8) {
-                uint8_t current = (value >> (bits - 8)) & 0xff;
-                write_byte(current);
-                bits -= 8;
-            } else {
-                uint8_t current = (value >> (bits - 1)) & 0x1;
-                write_bit(current);
-                bits -= 1;
+        frequency_table frequencies = create_frequency_table(is);
+        if (frequencies.total() == 0) {
+            std::println("Error: Input file {} is empty", input_filename);
+            return 1;
+        }
+
+        tree_node *root = create_binary_tree(frequencies);
+        codes_table codes;
+        create_codes_table(codes, root, 0, 0);
+
+        std::ofstream os(output_filename, std::ios::binary);
+        if (!os) {
+            std::println("Error: Could not open file {}", output_filename);
+            delete_binary_tree(root);
+            return 1;
+        }
+
+        write_encoding(is, os, frequencies, codes);
+        delete_binary_tree(root);
+
+        return 0;
+    }
+};  // namespace huffman_encode
+
+namespace huffman_decode {
+    struct code_triplet {
+        uint8_t symbol_;
+        uint8_t length_;
+        uint32_t code_;
+    };
+
+    class codes_table {
+        std::vector<code_triplet> codes_;
+
+      public:
+        void operator()(uint8_t symbol, uint8_t length, uint32_t code) {
+            codes_.push_back({symbol, length, code});
+        }
+
+        auto begin() const {
+            return codes_.begin();
+        }
+
+        auto end() const {
+            return codes_.end();
+        }
+    };
+
+    struct tree_node {
+        int16_t symbol_ = -1;
+        size_t frequency_ = 0;
+        tree_node *left_ = nullptr;
+        tree_node *right_ = nullptr;
+
+        tree_node() {}
+
+        tree_node(int16_t symbol, size_t frequency) : symbol_(symbol), frequency_(frequency) {}
+
+        tree_node(tree_node *left, tree_node *right)
+            : frequency_(left->frequency_ + right->frequency_), left_(left), right_(right) {}
+
+        bool operator!() const {
+            return left_ == nullptr && right_ == nullptr;
+        }
+
+        int operator<(const tree_node &rhs) const {
+            if (frequency_ == rhs.frequency_) {
+                return symbol_ < rhs.symbol_;
             }
+            return frequency_ > rhs.frequency_;
         }
-        return os_;
+    };
+
+    bool read_magic_number(std::istream &is) {
+        const std::string magic_number = "HUFFMAN1";
+        std::string read_magic_number(8, '\0');
+        is.read(read_magic_number.data(), 8);
+        return read_magic_number == magic_number;
     }
 
-    void flush() {
-        if (pending_ > 0) {
-            buffer_ = buffer_ << (8 - pending_);
-            os_.put(buffer_);
-            pending_ = 0;
-        }
+    size_t read_table_entries(std::istream &is) {
+        uint8_t table_entries;
+        is.read(reinterpret_cast<char *>(&table_entries), 1);
+        return table_entries == 0 ? 256 : table_entries;
     }
-};
 
-struct node {
-    uint8_t symbol_;
-    size_t frequency_;
-    node *left_;
-    node *right_;
-
-    node(uint8_t symbol, size_t frequency) : symbol_(symbol), frequency_(frequency), left_(nullptr), right_(nullptr) {}
-
-    node(node *left, node *right)
-        : symbol_(0), frequency_(left->frequency_ + right->frequency_), left_(left), right_(right) {}
-};
-
-node *build_tree(const std::unordered_map<uint8_t, size_t> &symbols_frequency) {
-    std::vector<node *> tree;
-    for (const auto &symbol : symbols_frequency) {
-        const auto &key = symbol.first;
-        const auto &value = symbol.second;
-        node *leaf = new node(key, value);
-        tree.push_back(leaf);
-    }
-    std::sort(tree.begin(), tree.end(), [](node *a, node *b) {
-        if (a->frequency_ == b->frequency_) {
-            return a->symbol_ > b->symbol_;
+    codes_table read_codes_table(bit_stream::bit_reader &reader, size_t table_entries) {
+        codes_table codes;
+        for (size_t i = 0; i < table_entries; ++i) {
+            uint64_t symbol, length, code;
+            reader.read(symbol, 8);
+            reader.read(length, 5);
+            reader.read(code, length);
+            codes(symbol, length, code);
         }
-        return a->frequency_ > b->frequency_;
-    });
+        return codes;
+    }
 
-    while (tree.size() > 1) {
-        node *left = tree.back();
-        tree.pop_back();
-        node *right = tree.back();
-        tree.pop_back();
+    tree_node *create_binary_tree(codes_table &codes) {
+        tree_node *root = new tree_node();
 
-        node *parent = new node(left, right);
-        auto it = tree.begin();
-        for (size_t index = 0; index < tree.size(); index++) {
-            if (tree[index]->frequency_ <= parent->frequency_) {
-                break;
+        for (const auto &[symbol, length, code] : codes) {
+            tree_node *current = root;
+            for (int index = 1; index <= length; index++) {
+                uint8_t bit = (code >> (length - index)) & 0x1;
+                if (bit == 0) {
+                    if (current->left_ == nullptr) {
+                        current->left_ = new tree_node();
+                    }
+                    current = current->left_;
+                } else {
+                    if (current->right_ == nullptr) {
+                        current->right_ = new tree_node();
+                    }
+                    current = current->right_;
+                }
             }
-            it += 1;
+            current->symbol_ = symbol;
         }
-        tree.insert(it, parent);
-    }
-    node *root = tree.back();
-    tree.pop_back();
-    return root;
-}
 
-void create_codes(std::unordered_map<uint8_t, std::pair<uint8_t, uint32_t>> &table, node *leaf, uint8_t length,
-                  uint32_t code) {
-    if (leaf->left_ == nullptr) {
-        table[leaf->symbol_] = std::make_pair(length, code);
-    } else {
-        create_codes(table, leaf->left_, length + 1, (code << 1) | 0x0);
-        create_codes(table, leaf->right_, length + 1, (code << 1) | 0x1);
-    }
-}
-
-int compression(const std::string &input_filename, const std::string output_filename) {
-    std::ifstream is(input_filename, std::ios::binary);
-    if (!is) {
-        std::println("Error: Could not open file {}", input_filename);
-        return 1;
+        return root;
     }
 
-    is.seekg(0, std::ios::end);
-    const auto length = is.tellg();
-    is.seekg(0, std::ios::beg);
-    if (length <= 0) {
-        std::println("Error: Could not read file {}", input_filename);
-        return 1;
-    }
-
-    const auto elements = static_cast<size_t>(length) / sizeof(uint8_t);
-    if (elements == 0) {
-        std::println("Error: Could not read file {}", input_filename);
-        return 1;
-    }
-
-    std::vector<uint8_t> data(elements);
-    is.read(reinterpret_cast<char *>(data.data()), static_cast<int64_t>(elements * sizeof(uint8_t)));
-
-    std::unordered_map<uint8_t, size_t> symbols_frequency;
-    for (const auto &symbol : data) {
-        symbols_frequency[symbol] += 1;
-    }
-
-    node *root = build_tree(symbols_frequency);
-    std::unordered_map<uint8_t, std::pair<uint8_t, uint32_t>> table;
-    create_codes(table, root, 0, 0);
-
-    std::ofstream os(output_filename, std::ios::binary);
-    if (!os) {
-        std::println("Error: Could not open file {}", output_filename);
-        return 1;
-    }
-
-    bit_writer writer(os);
-    std::print(os, "HUFFMAN1");
-    writer(table.size(), 8);
-    for (const auto &triplet : table) {
-        const auto &symbol = triplet.first;
-        const auto &length = triplet.second.first;
-        const auto &code = triplet.second.second;
-        writer(symbol, 8);
-        writer(length, 5);
-        writer(code, length);
-    }
-    writer(data.size(), 32);
-    for (const auto &symbol : data) {
-        const auto &length = table[symbol].first;
-        const auto &code = table[symbol].second;
-        writer(code, length);
-    }
-
-    return 0;
-}
-
-int decompression(const std::string &input_filename, const std::string output_filename) {
-    std::ifstream is(input_filename, std::ios::binary);
-    if (!is) {
-        std::println("Error: Could not open file {}", input_filename);
-        return 1;
-    }
-
-    bit_reader reader(is);
-    uint64_t entries = 0;
-    reader(entries, 64);
-    entries = 0;
-    reader(entries, 8);
-
-    std::unordered_map<uint8_t, std::pair<uint8_t, uint32_t>> table;
-    for (size_t index = 0; index < entries; index++) {
-        uint64_t symbol = 0;
-        reader(symbol, 8);
-        uint64_t length = 0;
-        reader(length, 5);
-        uint64_t code = 0;
-        reader(code, length);
-        table[symbol] = std::make_pair(length, code);
-    }
-
-    uint64_t symbols = 0;
-    reader(symbols, 32);
-
-    std::vector<uint8_t> data;
-    for (size_t index = 0; index < symbols; index++) {
-        uint64_t code = 0;
-        while (!table.contains(code)) {
-            uint64_t bit = 0;
-            reader(bit, 1);
-            code = (code << 1) | bit;
+    void delete_binary_tree(tree_node *node) {
+        if (!*node) {
+            delete node;
+        } else {
+            delete_binary_tree(node->left_);
+            delete_binary_tree(node->right_);
+            delete node;
         }
     }
 
-    std::ofstream os(output_filename);
-    if (!os) {
-        std::println("Error: Could not open file {}", output_filename);
-        return 1;
+    void read_encoding(bit_stream::bit_reader &reader, std::ostream &os, tree_node *root) {
+        uint32_t number_symbols;
+        reader.read(reinterpret_cast<uint64_t &>(number_symbols), 32);
+
+        for (uint32_t index = 0; index < number_symbols; index++) {
+            tree_node *current = root;
+            while (current->symbol_ == -1) {
+                uint64_t bit;
+                reader.read(bit, 1);
+                current = bit == 0 ? current->left_ : current->right_;
+            }
+            os.put(static_cast<char>(current->symbol_));
+        }
     }
 
-    return 0;
-}
+    int decompression(const std::string &input_filename, const std::string &output_filename) {
+        std::ifstream is(input_filename, std::ios::binary);
+        if (!is) {
+            std::println("Error: Could not open file {}", output_filename);
+            return 1;
+        }
+
+        if (!read_magic_number(is)) {
+            std::println("Error: Invalid magic number in file {}", input_filename);
+            return 1;
+        }
+        const size_t table_entries = read_table_entries(is);
+
+        bit_stream::bit_reader reader(is);
+        codes_table codes = read_codes_table(reader, table_entries);
+        tree_node *root = create_binary_tree(codes);
+
+        std::ofstream os(output_filename, std::ios::binary);
+        if (!os) {
+            std::println("Error: Could not open file {}", output_filename);
+            delete_binary_tree(root);
+            return 1;
+        }
+
+        read_encoding(reader, os, root);
+        delete_binary_tree(root);
+
+        return 0;
+    }
+};  // namespace huffman_decode
 
 int main(int argc, char **argv) {
     if (argc != 4) {
@@ -282,16 +459,16 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    const std::string huffman_mode = argv[1];
+    const std::string operation = argv[1];
     const std::string input_filename = argv[2];
     const std::string output_filename = argv[3];
 
-    if (huffman_mode == "c") {
-        return compression(input_filename, output_filename);
-    } else if (huffman_mode == "d") {
-        return decompression(input_filename, output_filename);
+    if (operation == "c") {
+        return huffman_encode::compression(input_filename, output_filename);
+    } else if (operation == "d") {
+        return huffman_decode::decompression(input_filename, output_filename);
     } else {
-        std::println("Error: Invalid mode '{}'. Use 'c' for compression or 'd' for decompression", huffman_mode);
+        std::println("Error: Invalid operation '{}'. Use 'c' for compression or 'd' for decompression", operation);
         return 1;
     }
 }

@@ -15,7 +15,7 @@ IncludeCategories:
 ---
 Language: Cpp
 NamespaceIndentation: All
-AccessModifierOffset: -4
+AccessModifierOffset: -2
 IndentAccessModifiers: false
 AllowShortLambdasOnASingleLine: Empty
 BreakBeforeBraces: Attach

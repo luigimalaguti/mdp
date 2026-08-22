@@ -14,8 +14,8 @@
     "command": "make rebuild && bin/huffman1",
     "args": [
       "d",
-      "inputs/example_01.txt",
-      "outputs/example_01.h1"
+      "outputs/example_01.h1",
+      "inputs/example_01.txt"
     ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/huffman1",
   },
