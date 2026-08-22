@@ -1,0 +1,28 @@
+[
+  {
+    "label": "Debug huffman2 compress",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/huffman2/bin/huffman2",
+    "args": [
+      "c",
+      "inputs/example_01.txt",
+      "outputs/example_01.h2"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman2",
+  },
+  {
+    "label": "Debug huffman2 decompress",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/huffman2/bin/huffman2",
+    "args": [
+      "d",
+      "outputs/example_01.h2",
+      "inputs/example_01.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman2",
+  }
+]

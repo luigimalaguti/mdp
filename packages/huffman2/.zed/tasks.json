@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Run huffman2 compress",
+    "command": "make rebuild && bin/huffman2",
+    "args": [
+      "c",
+      "inputs/example_01.txt",
+      "outputs/example_01.h2"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman2",
+  },
+  {
+    "label": "Run huffman2 decompress",
+    "command": "make rebuild && bin/huffman2",
+    "args": [
+      "d",
+      "outputs/example_01.h2",
+      "inputs/example_01.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman2",
+  },
+]
