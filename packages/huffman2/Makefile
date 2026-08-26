@@ -1,3 +1,3 @@
-EXEC := huffman1
+EXEC := huffman2
 
 include ../common.mk
