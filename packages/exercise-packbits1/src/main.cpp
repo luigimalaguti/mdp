@@ -21,7 +21,7 @@ int compression(const std::string &input_filename, const std::string &output_fil
 
     state current_state = IDLE;
     uint8_t current_symbol = 0;
-    int16_t current_size = 0;
+    uint8_t current_size = 0;
     std::vector<uint8_t> buffer(128);
 
     while (is.read(reinterpret_cast<char *>(&current_symbol), 1)) {
