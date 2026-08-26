@@ -4,25 +4,25 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/elias/bin/elias",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-elias/bin/elias",
     "args": [
       "c",
       "inputs/file01.txt",
       "outputs/file01.bin"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-elias",
   },
   {
     "label": "Debug elias decompression",
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/elias/bin/elias",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-elias/bin/elias",
     "args": [
       "d",
       "outputs/file01.bin",
       "inputs/file01.txt"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-elias",
   }
 ]

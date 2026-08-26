@@ -7,7 +7,7 @@
       "inputs/example_plain.txt",
       "outputs/example_plain.h1"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman1",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-huffman1",
   },
   {
     "label": "Run huffman1 decompression",
@@ -17,6 +17,6 @@
       "outputs/example_encoded.h1",
       "inputs/example_encoded.txt"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman1",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-huffman1",
   },
 ]

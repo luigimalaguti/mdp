@@ -4,11 +4,11 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/frequencies/bin/frequencies",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-frequencies/bin/frequencies",
     "args": [
       "inputs/bibbia.txt",
       "outputs/bibbia.txt",
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/frequencies",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-frequencies",
   }
 ]

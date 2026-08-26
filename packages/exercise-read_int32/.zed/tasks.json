@@ -6,6 +6,6 @@
       "inputs/file01.bin",
       "outputs/file01.txt"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/read_int32",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-read_int32",
   },
 ]

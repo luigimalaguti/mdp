@@ -7,7 +7,7 @@
       "inputs/compressme1.txt",
       "outputs/compressed1.bin"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/packbits1",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-packbits1",
   },
   {
     "label": "Run packbits1 decompression",
@@ -17,6 +17,6 @@
       "outputs/compressed1.bin",
       "inputs/compressme1.txt"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/packbits1",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-packbits1",
   }
 ]

@@ -7,7 +7,7 @@
       "inputs/example.txt",
       "outputs/example.h2"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman2",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-huffman2",
   },
   {
     "label": "Run huffman2 decompression",
@@ -17,6 +17,6 @@
       "outputs/example.h2",
       "inputs/example.txt"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/huffman2",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-huffman2",
   }
 ]

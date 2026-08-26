@@ -7,7 +7,7 @@
       "inputs/file01.txt",
       "outputs/file01.bin"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-elias",
   },
   {
     "label": "Run elias decompression",
@@ -17,6 +17,6 @@
       "outputs/file01.bin",
       "inputs/file01.txt"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/packages/elias",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-elias",
   },
 ]
