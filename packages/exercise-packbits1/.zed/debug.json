@@ -1,0 +1,28 @@
+[
+  {
+    "label": "Debug packbits1 compression",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/packbits1/bin/packbits",
+    "args": [
+      "c",
+      "inputs/compressme1.txt",
+      "outputs/compressed1.bin"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/packbits1",
+  },
+  {
+    "label": "Debug packbits1 decompression",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/packbits1/bin/packbits",
+    "args": [
+      "d",
+      "outputs/compressed1.bin",
+      "inputs/compressme1.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/packbits1",
+  }
+]

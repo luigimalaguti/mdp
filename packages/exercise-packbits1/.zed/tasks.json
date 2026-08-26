@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Run packbits1 compression",
+    "command": "make rebuild && bin/packbits",
+    "args": [
+      "c",
+      "inputs/compressme1.txt",
+      "outputs/compressed1.bin"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/packbits1",
+  },
+  {
+    "label": "Run packbits1 decompression",
+    "command": "make rebuild && bin/packbits",
+    "args": [
+      "d",
+      "outputs/compressed1.bin",
+      "inputs/compressme1.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/packbits1",
+  }
+]
