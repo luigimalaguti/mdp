@@ -1,0 +1,13 @@
+[
+  {
+    "label": "Debug combine",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-combine/bin/combine",
+    "args": [
+      "inputs/frog"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-combine",
+  }
+]
