@@ -1,0 +1,10 @@
+[
+  {
+    "label": "Run gradient",
+    "command": "make rebuild && bin/gradient",
+    "args": [
+      "outputs/image.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-gradient",
+  },
+]
