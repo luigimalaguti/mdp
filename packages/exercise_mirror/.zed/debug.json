@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Debug mirror",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-mirror/bin/mirror",
+    "args": [
+      "inputs/laptop.pam",
+      "outputs/mirror_laptop.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-mirror",
+  }
+]
