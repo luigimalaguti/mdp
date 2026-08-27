@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Run huffdiff compression",
+    "command": "make rebuild && bin/huffdiff",
+    "args": [
+      "c",
+      "inputs/frog.pam",
+      "outputs/frog.huffdiff"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-huffdiff",
+  },
+  {
+    "label": "Run huffdiff decompression",
+    "command": "make rebuild && bin/huffdiff",
+    "args": [
+      "d",
+      "outputs/frog.huffdiff",
+      "inputs/frog.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-huffdiff",
+  }
+]
