@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Run flip",
+    "command": "make rebuild && bin/flip",
+    "args": [
+      "inputs/frog.pam",
+      "outputs/flip_frog.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-flip",
+  },
+]
