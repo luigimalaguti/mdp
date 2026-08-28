@@ -3,7 +3,7 @@
     "label": "Run combine",
     "command": "make rebuild && bin/combine",
     "args": [
-      "inputs/frog"
+      "inputs/frog_rgb"
     ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-combine",
   },
