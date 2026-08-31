@@ -20,9 +20,6 @@ int compression(const std::string &input_filename, const std::string &output_fil
     std::string difference_filename = (path.parent_path() / path.stem()).string() + "_difference.pam";
     difference.viewable().save(difference_filename);
 
-    auto frequency_table = std::for_each(difference.begin(), difference.end(), huffman::frequency_table<int16_t>());
-    huffman::canonical_encoder<int16_t> encoder(frequency_table);
-
     std::ofstream os(output_filename, std::ios::binary);
     if (!os) {
         std::println("Error: Could not open file {}", output_filename);
@@ -36,11 +33,12 @@ int compression(const std::string &input_filename, const std::string &output_fil
     os.write(reinterpret_cast<const char *>(&width), 4);
     os.write(reinterpret_cast<const char *>(&height), 4);
 
+    auto frequencies = std::for_each(difference.begin(), difference.end(), huffman::frequency_table<int16_t>());
+    huffman::canonical_encoder<int16_t> encoder(frequencies);
+
     bit_stream::bit_writer writer(os);
     writer.write(encoder.size(), 9);
-
-    auto codes = encoder.to_vector();
-    for (const auto &[symbol, length] : codes) {
+    for (const auto &[symbol, length] : encoder.table()) {
         writer.write(symbol, 9).write(length, 5);
     }
 
@@ -80,32 +78,26 @@ int decompression(const std::string &input_filename, const std::string &output_f
     for (uint16_t index = 0; index < number_symbols; index++) {
         int16_t symbol = reader.read<int16_t>(9);
         uint8_t length = reader.read(5);
-        lengths[symbol] = length;
+        lengths(symbol, length);
     }
-
-    containers::matrix<int16_t> raw_data(height, width);
     huffman::canonical_decoder<int16_t> decoder(lengths);
-    for (uint32_t row = 0; row < raw_data.rows(); row++) {
-        for (uint32_t col = 0; col < raw_data.cols(); col++) {
-            bool decoded = false;
-            uint32_t current_bits = 0;
-            uint8_t current_length = 0;
-            while (!decoded) {
-                uint8_t bit = reader.read(1);
-                current_bits = (current_bits << 1) | bit;
-                current_length++;
 
-                int32_t index = decoder.find({current_length, current_bits});
-                if (index != -1) {
-                    raw_data[row, col] = decoder[index].symbol;
-                    decoded = true;
-                }
+    containers::matrix<int16_t> raw_difference(height, width);
+    for (uint32_t row = 0; row < raw_difference.rows(); row++) {
+        for (uint32_t col = 0; col < raw_difference.cols(); col++) {
+            uint32_t bits = 0, length = 0;
+            int32_t index = -1;
+            while (index == -1) {
+                bits = (bits << 1) | reader.read<uint8_t>(1);
+                length += 1;
+                index = decoder.find({length, bits});
             }
+            raw_difference[row, col] = decoder[index].symbol;
         }
     }
 
-    pam::image<int16_t> difference(std::move(raw_data));
-    pam::image<uint8_t> data = difference.restore<uint8_t>();
+    pam::image<int16_t> difference(std::move(raw_difference));
+    pam::image data = difference.restore<uint8_t>();
     if (!data.save(output_filename)) {
         std::println("Error: Could not open file {}", output_filename);
         return 1;

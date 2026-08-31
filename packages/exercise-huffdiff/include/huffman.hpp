@@ -2,31 +2,92 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <memory>
-#include <stdexcept>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace huffman {
-
     template <typename S = uint8_t>
     class frequency_table {
-        std::unordered_map<S, size_t> table_;
-        size_t total_ = 0;
+        std::unordered_map<S, size_t> occurrences_;
 
       public:
         void operator()(const S &symbol) {
-            table_[symbol] += 1;
-            total_ += 1;
+            occurrences_[symbol] += 1;
         }
 
         auto begin() const {
-            return table_.begin();
+            return occurrences_.begin();
         }
+
         auto end() const {
-            return table_.end();
+            return occurrences_.end();
         }
     };
+
+    struct codeword {
+        uint32_t length;
+        uint32_t bits;
+    };
+
+    template <typename S = uint8_t>
+    struct symbol_codeword {
+        S symbol;
+        uint32_t length;
+        uint32_t bits;
+    };
+
+    template <typename S = uint8_t>
+    class length_table {
+        std::vector<std::pair<S, uint32_t>> entries_;
+
+      public:
+        void operator()(const S &symbol, uint32_t length) {
+            entries_.push_back({symbol, length});
+        }
+
+        auto begin() const {
+            return entries_.begin();
+        }
+
+        auto end() const {
+            return entries_.end();
+        }
+    };
+
+    template <typename S = uint8_t>
+    class codeword_table {
+        std::vector<symbol_codeword<S>> entries_;
+
+      public:
+        void operator()(const S &symbol, uint32_t length, uint32_t bits) {
+            entries_.push_back({symbol, length, bits});
+        }
+
+        const auto &operator[](size_t index) const {
+            return entries_[index];
+        }
+
+        auto &operator[](size_t index) {
+            return entries_[index];
+        }
+
+        auto begin() const {
+            return entries_.begin();
+        }
+
+        auto end() const {
+            return entries_.end();
+        }
+
+        size_t size() const {
+            return entries_.size();
+        }
+    };
+
+    /*
+     * STANDARD HUFFMAN
+     */
 
     template <typename S>
     struct node {
@@ -44,201 +105,115 @@ namespace huffman {
         }
     };
 
-    struct code {
-        uint8_t length;
-        uint32_t bits;
-    };
-
     template <typename S = uint8_t>
-    class canonical_encoder {
-        // Ordine "canonico": raggruppato per lunghezza crescente. A parità di lunghezza
-        // l'ordine NON è per simbolo, ma è quello che risulta da uno std::sort non stabile
-        // (il confronto usato ignora il simbolo, guarda solo la lunghezza) applicato
-        // all'ordine di visita dell'albero: per riprodurlo bit-esatto rispetto al
-        // riferimento bisogna usare esattamente lo stesso algoritmo (std::sort/lower_bound
-        // non stabili), non un ordinamento "pulito" per simbolo.
-        std::vector<std::pair<S, code>> ordered_codes_;
-        std::unordered_map<S, code> codes_;  // lookup veloce per simbolo
+    class encoder {
+        codeword_table<S> ordered_codes_;
+        std::unordered_map<S, codeword> codes_;
 
-        std::vector<std::unique_ptr<node<S>>> storage_;
-
-        static bool by_frequency_desc(const node<S> *a, const node<S> *b) {
+        static bool by_frequency_descending(const node<S> *a, const node<S> *b) {
             return a->frequency > b->frequency;
         }
 
-        node<S> *generate_tree(const frequency_table<S> &freq_table) {
+        static node<S> *generate_tree(const frequency_table<S> &frequencies) {
             std::vector<node<S> *> nodes;
-            for (const auto &[symbol, frequency] : freq_table) {
-                node<S> *n = new node<S>(symbol, frequency);
-                storage_.emplace_back(n);
-                nodes.push_back(n);
+            for (const auto &[symbol, frequency] : frequencies) {
+                nodes.push_back(new node<S>(symbol, frequency));
             }
-
             if (nodes.empty()) {
                 return nullptr;
             }
-
-            std::sort(nodes.begin(), nodes.end(), by_frequency_desc);
+            std::sort(nodes.begin(), nodes.end(), by_frequency_descending);
 
             while (nodes.size() > 1) {
-                node<S> *n1 = nodes.back();
+                node<S> *left = nodes.back();
                 nodes.pop_back();
-                node<S> *n2 = nodes.back();
+                node<S> *right = nodes.back();
                 nodes.pop_back();
-                node<S> *parent = new node<S>(n1, n2);
-                storage_.emplace_back(parent);
-                auto it = std::lower_bound(nodes.begin(), nodes.end(), parent, by_frequency_desc);
+                node<S> *parent = new node<S>(left, right);
+                auto it = std::lower_bound(nodes.begin(), nodes.end(), parent, by_frequency_descending);
                 nodes.insert(it, parent);
             }
+            node<S> *root = nodes.back();
+            nodes.pop_back();
 
-            return nodes.back();
+            return root;
         }
 
-        void generate_codes(std::vector<std::pair<S, code>> &out, const node<S> *n, uint32_t length) {
-            if (n->is_leaf()) {
-                out.push_back({n->symbol, {static_cast<uint8_t>(length), 0}});
+        static void delete_tree(node<S> *root) {
+            if (root == nullptr) {
+                return;
+            }
+            delete_tree(root->left);
+            delete_tree(root->right);
+            delete root;
+        }
+
+        void generate_codes(const node<S> *current, uint32_t length = 0, uint32_t bits = 0) {
+            if (current->is_leaf()) {
+                ordered_codes_(current->symbol, length, bits);
             } else {
-                generate_codes(out, n->left, length + 1);
-                generate_codes(out, n->right, length + 1);
+                generate_codes(current->left, length + 1, (bits << 1) | 0x0);
+                generate_codes(current->right, length + 1, (bits << 1) | 0x1);
             }
         }
 
       public:
-        canonical_encoder(const frequency_table<S> &freq_table) {
-            node<S> *root = generate_tree(freq_table);
-            if (root) {
-                generate_codes(ordered_codes_, root, 0);
+        explicit encoder(const frequency_table<S> &frequencies) {
+            node<S> *root = generate_tree(frequencies);
+            if (root != nullptr) {
+                generate_codes(root);
+                delete_tree(root);
             }
-            // std::sort (non stabile) che confronta solo la lunghezza, come il riferimento.
-            std::sort(ordered_codes_.begin(), ordered_codes_.end(), [](const auto &a, const auto &b) {
-                return a.second.length < b.second.length;
-            });
-
-            uint32_t current_code = 0;
-            uint8_t current_length = 0;
-            for (auto &[symbol, c] : ordered_codes_) {
-                current_code <<= (c.length - current_length);
-                current_length = c.length;
-                c.bits = current_code;
-                current_code += 1;
-            }
-
-            for (const auto &[symbol, c] : ordered_codes_) {
-                codes_[symbol] = c;
+            for (const auto &[symbol, length, bits] : ordered_codes_) {
+                codes_[symbol] = {length, bits};
             }
         }
 
         const auto &operator[](const S &symbol) const {
             return codes_.at(symbol);
         }
+
         auto &operator[](const S &symbol) {
             return codes_[symbol];
         }
 
-        auto begin() const {
-            return codes_.begin();
-        }
-        auto end() const {
-            return codes_.end();
-        }
         size_t size() const {
             return codes_.size();
         }
 
-        std::vector<std::pair<S, uint8_t>> to_vector() const {
-            std::vector<std::pair<S, uint8_t>> vec;
-            for (const auto &[symbol, c] : ordered_codes_) {
-                vec.push_back({symbol, c.length});
-            }
-            return vec;
+        const codeword_table<S> &table() const {
+            return ordered_codes_;
         }
     };
 
     template <typename S = uint8_t>
-    class length_table {
-        // Vector invece di unordered_map: deve preservare l'ordine con cui le coppie
-        // (simbolo, lunghezza) sono lette dal file, come richiesto dal formato.
-        std::vector<std::pair<S, uint8_t>> table_;
+    class decoder {
+        codeword_table<S> codes_;
+        std::unordered_map<uint64_t, size_t> lookup_;
 
-      public:
-        const auto &operator[](const S &symbol) const {
-            for (const auto &[s, length] : table_) {
-                if (s == symbol) {
-                    return length;
-                }
-            }
-            throw std::out_of_range("symbol not found");
-        }
-        auto &operator[](const S &symbol) {
-            for (auto &[s, length] : table_) {
-                if (s == symbol) {
-                    return length;
-                }
-            }
-            table_.push_back({symbol, uint8_t{0}});
-            return table_.back().second;
-        }
-        auto begin() const {
-            return table_.begin();
-        }
-        auto end() const {
-            return table_.end();
-        }
-    };
-
-    template <typename S = uint8_t>
-    struct triplet {
-        S symbol;
-        uint8_t length;
-        uint32_t bits;
-    };
-
-    template <typename S = uint8_t>
-    class canonical_decoder {
-        std::vector<triplet<S>> codes_;
-        std::unordered_map<uint64_t, int32_t> lookup_;
-
-        void generate_canonical_codes(const length_table<S> &lengths) {
-            // Stable: a parità di lunghezza mantiene l'ordine con cui le coppie sono
-            // apparse nel file (come richiesto dal formato), senza riordinare per simbolo.
-            std::vector<std::pair<S, uint8_t>> symbols(lengths.begin(), lengths.end());
-            std::stable_sort(symbols.begin(), symbols.end(), [](const auto &a, const auto &b) {
-                return a.second < b.second;
-            });
-
-            uint32_t current_code = 0;
-            uint8_t current_length = 0;
-            for (const auto &[symbol, length] : symbols) {
-                if (length > current_length) {
-                    current_code <<= (length - current_length);
-                    current_length = length;
-                }
-                int32_t idx = static_cast<int32_t>(codes_.size());
-                codes_.push_back({symbol, current_length, current_code});
-
-                uint64_t key = (static_cast<uint64_t>(current_length) << 32) | current_code;
-                lookup_[key] = idx;
-                current_code += 1;
-            }
+        static uint64_t hash_key(uint32_t length, uint32_t bits) {
+            return (static_cast<uint64_t>(length) << 32) | bits;
         }
 
       public:
-        canonical_decoder(const length_table<S> &lengths) {
-            generate_canonical_codes(lengths);
+        explicit decoder(codeword_table<S> codes) : codes_(std::move(codes)) {
+            for (size_t index = 0; index < codes_.size(); index++) {
+                lookup_[hash_key(codes_[index].length, codes_[index].bits)] = index;
+            }
         }
 
-        const auto &operator[](const size_t index) const {
-            return codes_[index];
-        }
-        auto &operator[](const size_t index) {
+        const auto &operator[](size_t index) const {
             return codes_[index];
         }
 
-        int32_t find(const code &c) const {
-            uint64_t key = (static_cast<uint64_t>(c.length) << 32) | c.bits;
-            auto it = lookup_.find(key);
+        auto &operator[](size_t index) {
+            return codes_[index];
+        }
+
+        int32_t find(const codeword &query) const {
+            auto it = lookup_.find(hash_key(query.length, query.bits));
             if (it != lookup_.end()) {
-                return it->second;
+                return static_cast<int32_t>(it->second);
             }
             return -1;
         }
@@ -248,4 +223,111 @@ namespace huffman {
         }
     };
 
+    /*
+     * CANONICAL HUFFMAN
+     */
+
+    template <typename S = uint8_t>
+    class canonical_encoder {
+        std::vector<std::pair<S, codeword>> ordered_codes_;
+        std::unordered_map<S, codeword> codes_;
+
+        static bool by_length_ascending(const std::pair<S, codeword> &a, const std::pair<S, codeword> &b) {
+            return a.second.length < b.second.length;
+        }
+
+        void assign_canonical_codes() {
+            std::sort(ordered_codes_.begin(), ordered_codes_.end(), by_length_ascending);
+
+            uint32_t current_bits = 0;
+            uint32_t current_length = 0;
+            for (auto &[symbol, code] : ordered_codes_) {
+                current_bits = current_bits << (code.length - current_length);
+                current_length = code.length;
+                code.bits = current_bits;
+                current_bits += 1;
+            }
+        }
+
+      public:
+        explicit canonical_encoder(const frequency_table<S> &frequencies) {
+            encoder<S> standard(frequencies);
+            for (const auto &[symbol, length, bits] : standard.table()) {
+                ordered_codes_.push_back({symbol, {length, 0}});
+            }
+            assign_canonical_codes();
+
+            for (const auto &[symbol, code] : ordered_codes_) {
+                codes_[symbol] = code;
+            }
+        }
+
+        const auto &operator[](const S &symbol) const {
+            return codes_.at(symbol);
+        }
+
+        auto &operator[](const S &symbol) {
+            return codes_[symbol];
+        }
+
+        size_t size() const {
+            return codes_.size();
+        }
+
+        length_table<S> table() const {
+            length_table<S> lengths;
+            for (const auto &[symbol, code] : ordered_codes_) {
+                lengths(symbol, code.length);
+            }
+            return lengths;
+        }
+    };
+
+    template <typename S = uint8_t>
+    class canonical_decoder {
+        decoder<S> standard_decoder_;
+
+        static bool by_length_ascending(const std::pair<S, uint32_t> &a, const std::pair<S, uint32_t> &b) {
+            return a.second < b.second;
+        }
+
+        static codeword_table<S> assign_canonical_codes(const length_table<S> &lengths) {
+            std::vector<std::pair<S, uint32_t>> symbols(lengths.begin(), lengths.end());
+            std::stable_sort(symbols.begin(), symbols.end(), by_length_ascending);
+
+            codeword_table<S> codes;
+            uint32_t current_bits = 0;
+            uint32_t current_length = 0;
+            for (const auto &[symbol, length] : symbols) {
+                if (length > current_length) {
+                    current_bits = current_bits << (length - current_length);
+                    current_length = length;
+                }
+                codes(symbol, current_length, current_bits);
+                current_bits += 1;
+            }
+
+            return codes;
+        }
+
+      public:
+        explicit canonical_decoder(const length_table<S> &lengths)
+            : standard_decoder_(assign_canonical_codes(lengths)) {}
+
+        const auto &operator[](size_t index) const {
+            return standard_decoder_[index];
+        }
+
+        auto &operator[](size_t index) {
+            return standard_decoder_[index];
+        }
+
+        int32_t find(const codeword &query) const {
+            return standard_decoder_.find(query);
+        }
+
+        size_t size() const {
+            return standard_decoder_.size();
+        }
+    };
 }  // namespace huffman
