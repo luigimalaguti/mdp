@@ -153,9 +153,9 @@ namespace pam_image {
                 if (row == 0 && col == 0) {
                     original[row, col] = data[row, col];
                 } else if (col == 0) {
-                    original[row, col] = data[row, col] + original[row - 1, col] - 255;
+                    original[row, col] = data[row, col] + original[row - 1, col];
                 } else {
-                    original[row, col] = data[row, col] + original[row, col - 1] - 255;
+                    original[row, col] = data[row, col] + original[row, col - 1];
                 }
             }
         }

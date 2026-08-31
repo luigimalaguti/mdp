@@ -80,7 +80,11 @@ int decompression(const std::string &input_filename, const std::string &output_f
         uint64_t symbol;
         uint64_t length;
         reader.read(symbol, 9).read(length, 5);
-        lengths[symbol] = length;
+        int16_t signed_symbol = static_cast<int16_t>(symbol);
+        if (signed_symbol >= 256) {
+            signed_symbol -= 512;
+        }
+        lengths[signed_symbol] = length;
     }
 
     matrix<int16_t> difference(width, height);
