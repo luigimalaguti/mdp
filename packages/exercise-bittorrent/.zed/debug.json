@@ -1,0 +1,13 @@
+[
+  {
+    "label": "Debug torrent_dump",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-bittorrent/bin/torrent_dump",
+    "args": [
+      "inputs/KickAss.torrent"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-bittorrent",
+  }
+]
