@@ -1,19 +1,25 @@
 #include "bit_stream.hpp"
 #include "huffman.hpp"
-#include "pam_image.hpp"
+#include "pam.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <print>
 #include <string>
+#include <utility>
 
 int compression(const std::string &input_filename, const std::string &output_filename) {
-    pam_image::matrix data = pam_image::read_image(input_filename);
-    if (data.empty()) {
+    pam::image<uint8_t> image(input_filename);
+    if (image.empty()) {
         std::println("Error: Could not open file {}", input_filename);
         return 1;
     }
 
-    pam_image::matrix difference = compute_difference<int16_t, uint8_t>(data);
+    pam::image<int16_t> difference = image.difference<int16_t>();
+    std::filesystem::path path(input_filename);
+    std::string difference_filename = (path.parent_path() / path.stem()).string() + "_difference.pam";
+    difference.viewable().save(difference_filename);
+
     auto frequency_table = std::for_each(difference.begin(), difference.end(), huffman::frequency_table<int16_t>());
     huffman::canonical_encoder<int16_t> encoder(frequency_table);
 
@@ -50,9 +56,6 @@ int compression(const std::string &input_filename, const std::string &output_fil
 }
 
 int decompression(const std::string &input_filename, const std::string &output_filename) {
-    using namespace pam_image;
-    using namespace huffman;
-
     std::ifstream is(input_filename, std::ios::binary);
     if (!is) {
         std::println("Error: Could not open file {}", input_filename);
@@ -73,17 +76,17 @@ int decompression(const std::string &input_filename, const std::string &output_f
     bit_stream::bit_reader reader(is);
     uint16_t number_symbols = reader.read(9);
 
-    length_table<int16_t> lengths;
+    huffman::length_table<int16_t> lengths;
     for (uint16_t index = 0; index < number_symbols; index++) {
         int16_t symbol = reader.read<int16_t>(9);
         uint8_t length = reader.read(5);
         lengths[symbol] = length;
     }
 
-    matrix<int16_t> difference(width, height);
-    canonical_decoder<int16_t> decoder(lengths);
-    for (uint32_t row = 0; row < difference.rows(); row++) {
-        for (uint32_t col = 0; col < difference.cols(); col++) {
+    containers::matrix<int16_t> raw_data(height, width);
+    huffman::canonical_decoder<int16_t> decoder(lengths);
+    for (uint32_t row = 0; row < raw_data.rows(); row++) {
+        for (uint32_t col = 0; col < raw_data.cols(); col++) {
             bool decoded = false;
             uint32_t current_bits = 0;
             uint8_t current_length = 0;
@@ -94,15 +97,16 @@ int decompression(const std::string &input_filename, const std::string &output_f
 
                 int32_t index = decoder.find({current_length, current_bits});
                 if (index != -1) {
-                    difference[row, col] = decoder[index].symbol;
+                    raw_data[row, col] = decoder[index].symbol;
                     decoded = true;
                 }
             }
         }
     }
 
-    matrix data = restore_difference<uint8_t, int16_t>(difference);
-    if (!write_image(output_filename, data)) {
+    pam::image<int16_t> difference(std::move(raw_data));
+    pam::image<uint8_t> data = difference.restore<uint8_t>();
+    if (!data.save(output_filename)) {
         std::println("Error: Could not open file {}", output_filename);
         return 1;
     }
