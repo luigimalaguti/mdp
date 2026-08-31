@@ -31,8 +31,7 @@ int compression(const std::string &input_filename, const std::string &output_fil
     os.write(reinterpret_cast<const char *>(&height), 4);
 
     bit_stream::bit_writer writer(os);
-    uint64_t number_symbols = encoder.size();
-    writer.write(number_symbols, 9);
+    writer.write(encoder.size(), 9);
 
     auto codes = encoder.to_vector();
     for (const auto &[symbol, length] : codes) {
@@ -72,19 +71,13 @@ int decompression(const std::string &input_filename, const std::string &output_f
     is.read(reinterpret_cast<char *>(&height), 4);
 
     bit_stream::bit_reader reader(is);
-    uint64_t number_symbols;
-    reader.read(number_symbols, 9);
+    uint16_t number_symbols = reader.read(9);
 
     length_table<int16_t> lengths;
     for (uint16_t index = 0; index < number_symbols; index++) {
-        uint64_t symbol;
-        uint64_t length;
-        reader.read(symbol, 9).read(length, 5);
-        int16_t signed_symbol = static_cast<int16_t>(symbol);
-        if (signed_symbol >= 256) {
-            signed_symbol -= 512;
-        }
-        lengths[signed_symbol] = length;
+        int16_t symbol = reader.read<int16_t>(9);
+        uint8_t length = reader.read(5);
+        lengths[symbol] = length;
     }
 
     matrix<int16_t> difference(width, height);
@@ -95,7 +88,7 @@ int decompression(const std::string &input_filename, const std::string &output_f
             uint32_t current_bits = 0;
             uint8_t current_length = 0;
             while (!decoded) {
-                uint64_t bit = reader.read(1);
+                uint8_t bit = reader.read(1);
                 current_bits = (current_bits << 1) | bit;
                 current_length++;
 
