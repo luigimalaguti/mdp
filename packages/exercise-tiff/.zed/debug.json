@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Debug tiff2pam",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exercise-tiff/bin/tiff2pam",
+    "args": [
+      "inputs/frog.tiff",
+      "outputs/frog.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exercise-tiff",
+  }
+]
