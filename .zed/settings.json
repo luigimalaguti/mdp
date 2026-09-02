@@ -26,10 +26,12 @@
       ]
     },
     "JSON": {
+      "tab_size": 2,
       "format_on_save": "on",
       "formatter": "language_server",
     },
     "JSONC": {
+      "tab_size": 2,
       "format_on_save": "on",
       "formatter": "language_server",
     },
