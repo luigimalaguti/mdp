@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Debug snappy_decomp",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exam-snappy/bin/snappy_decomp",
+    "args": [
+      "inputs/lipsum.snappy",
+      "outputs/lipsum.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-snappy",
+  }
+]

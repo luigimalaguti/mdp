@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Run snappy_decomp",
+    "command": "make rebuild && bin/snappy_decomp",
+    "args": [
+      "inputs/lipsum.snappy",
+      "outputs/lipsum.txt"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-snappy",
+  },
+]
