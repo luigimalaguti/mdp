@@ -58,5 +58,28 @@
       "inputs/actors/crowe"
     ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/exam-alpha_compositing",
+  },
+  {
+    "label": "Debug alpha_compositing test",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exam-alpha_compositing/bin/compose",
+    "args": [
+      "outputs/test",
+      "-p",
+      "0",
+      "0",
+      "inputs/test/test1",
+      "-p",
+      "10",
+      "0",
+      "inputs/test/test2",
+      "-p",
+      "5",
+      "10",
+      "inputs/test/test3"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-alpha_compositing",
   }
 ]

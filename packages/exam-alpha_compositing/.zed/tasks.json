@@ -25,7 +25,7 @@
     "label": "Run alpha_compositing actors",
     "command": "make rebuild && bin/compose",
     "args": [
-      "actors",
+      "outputs/actors",
       "-p",
       "6",
       "4",
@@ -50,6 +50,26 @@
       "619",
       "230",
       "inputs/actors/crowe"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-alpha_compositing",
+  },
+  {
+    "label": "Run alpha_compositing test",
+    "command": "make rebuild && bin/compose",
+    "args": [
+      "outputs/test",
+      "-p",
+      "0",
+      "0",
+      "inputs/test/test1",
+      "-p",
+      "10",
+      "0",
+      "inputs/test/test2",
+      "-p",
+      "5",
+      "10",
+      "inputs/test/test3"
     ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/exam-alpha_compositing",
   }
