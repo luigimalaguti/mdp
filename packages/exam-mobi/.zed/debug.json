@@ -4,10 +4,10 @@
     "adapter": "CodeLLDB",
     "request": "launch",
     "build": "Rebuild",
-    "program": "$ZED_WORKTREE_ROOT/packages/exam-mobi/bin/MOBIdecoder",
+    "program": "$ZED_WORKTREE_ROOT/packages/exam-mobi/bin/MOBIdecode",
     "args": [
-      "inputs/Skin Game.mobi",
-      "outputs/Skin Game.html"
+      "inputs/Skin\\ Game.mobi",
+      "outputs/Skin\\ Game.html"
     ],
     "cwd": "$ZED_WORKTREE_ROOT/packages/exam-mobi",
   }

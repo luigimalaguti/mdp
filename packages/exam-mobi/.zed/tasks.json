@@ -1,11 +1,11 @@
 [
   {
     "label": "Run mobi",
-    "command": "make rebuild && bin/MOBIdecoder",
+    "command": "make rebuild && bin/MOBIdecode",
     "args": [
-      "inputs/Skin Game.mobi",
-      "outputs/Skin Game.html"
+      "inputs/Skin\\ Game.mobi",
+      "outputs/Skin\\ Game.html"
     ],
-    "cwd": "$ZED_WORKTREE_ROOT/exam-mobi/boilerplate",
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-mobi",
   }
 ]
