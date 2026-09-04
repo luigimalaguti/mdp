@@ -1,0 +1,11 @@
+[
+  {
+    "label": "Run qoi",
+    "command": "make rebuild && bin/qoi_decomp",
+    "args": [
+      "inputs/testcard.qoi",
+      "outputs/testcard.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-qoi",
+  },
+]

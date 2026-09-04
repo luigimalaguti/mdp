@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Debug qoi",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": "Rebuild",
+    "program": "$ZED_WORKTREE_ROOT/packages/exam-qoi/bin/qoi_decomp",
+    "args": [
+      "inputs/testcard.qoi",
+      "outputs/testcard.pam"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/packages/exam-qoi",
+  }
+]
